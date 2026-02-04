@@ -1,74 +1,79 @@
 package com.chargercontrol.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.chargercontrol.utils.BatteryControl
+import com.chargercontrol.data.Prefs
+import com.chargercontrol.utils.RootUtils
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen() {
-    var limit by remember { mutableFloatStateOf(80f) }
-    var isApplied by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val prefs = remember { Prefs(context) }
+    
+    val limitState = prefs.limitFlow.collectAsState(initial = 80)
+    val enabledState = prefs.enabledFlow.collectAsState(initial = false)
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Charging Limit", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(40.dp))
-        Box(contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(
-               progress = limit / 100f, 
-               modifier = Modifier.size(200.dp),
-               color = if (isApplied) Color(0xFF00E676) else Color(0xFF2196F3),
-               strokeWidth = 12.dp,
-               trackColor = Color(0xFF252525)
-               )
-
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("${limit.toInt()}%", color = Color.White, fontSize = 42.sp, fontWeight = FontWeight.Bold)
-                if (isApplied) Text("Active", color = Color(0xFF00E676), fontSize = 14.sp)
+        Card(
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Enable Charge Control", fontSize = 18.sp)
+                    Switch(
+                        checked = enabledState.value,
+                        onCheckedChange = { 
+                            scope.launch { prefs.setEnabled(it) }
+                        }
+                    )
+                }
             }
         }
-        Spacer(Modifier.height(50.dp))
-        Card(
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
-            shape = RoundedCornerShape(20.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(Modifier.padding(20.dp)) {
-                Text("Set Battery Stop Level", color = Color.Gray, fontSize = 14.sp)
-                Spacer(Modifier.height(16.dp))
+
+        Card(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("Limit: ${limitState.value}%", fontSize = 24.sp)
                 Slider(
-                    value = limit,
+                    value = limitState.value.toFloat(),
                     onValueChange = { 
-                        limit = it 
-                        isApplied = false 
+                        scope.launch { prefs.setLimit(it.toInt()) }
                     },
                     valueRange = 50f..100f,
-                    steps = 49,
-                    colors = SliderDefaults.colors(thumbColor = Color(0xFF2196F3), activeTrackColor = Color(0xFF2196F3))
+                    steps = 49
                 )
-                Spacer(Modifier.height(8.dp))
-                Button(
-                    onClick = { 
-                        BatteryControl.setChargingLimit(limit.toInt())
-                        isApplied = true
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3)),
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text("Apply Limit", color = Color.White)
-                }
+            }
+        }
+
+        Text("Manual Control", modifier = Modifier.padding(vertical = 8.dp))
+        
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Button(
+                onClick = { scope.launch { RootUtils.setCharging(false) } },
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+            ) {
+                Text("STOP CHARGING")
+            }
+            Button(
+                onClick = { scope.launch { RootUtils.setCharging(true) } },
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Text("RESUME CHARGING")
             }
         }
     }
