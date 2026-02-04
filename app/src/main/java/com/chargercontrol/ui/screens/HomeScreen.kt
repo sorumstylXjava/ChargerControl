@@ -1,5 +1,6 @@
 package com.chargercontrol.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -53,7 +54,16 @@ fun HomeScreen() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Enable charge control", fontSize = 18.sp, color = Color.White)
-                Switch(checked = enabledState.value, onCheckedChange = { scope.launch { prefs.setEnabled(it) } })
+                Switch(
+                    checked = enabledState.value, 
+                    onCheckedChange = { isChecked ->
+                        scope.launch { 
+                            prefs.setEnabled(isChecked)
+                            val msg = if(isChecked) "Control Enabled ✅" else "Control Disabled ❌"
+                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                        } 
+                    }
+                )
             }
         }
 
@@ -88,6 +98,9 @@ fun HomeScreen() {
                 Slider(
                     value = limitState.value.toFloat(),
                     onValueChange = { scope.launch { prefs.setLimit(it.toInt()) } },
+                    onValueChangeFinished = {
+                        Toast.makeText(context, "Limit set to ${limitState.value}%", Toast.LENGTH_SHORT).show()
+                    },
                     valueRange = 70f..100f,
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
@@ -98,14 +111,26 @@ fun HomeScreen() {
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Button(
-                onClick = { scope.launch { RootUtils.setCharging(false) } },
+                onClick = { 
+                    scope.launch { 
+                        val success = RootUtils.setCharging(false)
+                        if (success) Toast.makeText(context, "Charging Stopped 🛑", Toast.LENGTH_SHORT).show()
+                        else Toast.makeText(context, "Failed to stop charging", Toast.LENGTH_SHORT).show()
+                    } 
+                },
                 modifier = Modifier.weight(1f).height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF48FB1)),
                 shape = RoundedCornerShape(28.dp)
             ) { Text("STOP CHARGING", color = Color(0xFF4A148C)) }
             
             Button(
-                onClick = { scope.launch { RootUtils.setCharging(true) } },
+                onClick = { 
+                    scope.launch { 
+                        val success = RootUtils.setCharging(true)
+                        if (success) Toast.makeText(context, "Charging Resumed ⚡", Toast.LENGTH_SHORT).show()
+                        else Toast.makeText(context, "Failed to resume charging", Toast.LENGTH_SHORT).show()
+                    } 
+                },
                 modifier = Modifier.weight(1f).height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3)),
                 shape = RoundedCornerShape(28.dp)
