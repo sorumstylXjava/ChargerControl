@@ -3,44 +3,55 @@ package com.chargercontrol.utils
 import com.topjohnwu.superuser.Shell
 
 object RootUtils {
-    
-    init {
-        Shell.enableVerboseLogging = false
-        Shell.setDefaultBuilder(Shell.Builder.create().setFlags(Shell.FLAG_REDIRECT_STDERR))
-    }
-
-    private val CHARGING_PATHS = listOf(
+    private val KNOWN_CONTROL_PATHS = listOf(
         "/sys/class/power_supply/battery/charging_enabled",
         "/sys/class/power_supply/battery/input_suspend",
-        "/sys/class/power_supply/batt_slate_mode/enabled"
+        "/sys/class/power_supply/battery/battery_charging_enabled",
+        "/sys/class/power_supply/main/charging_enabled",
+        "/sys/class/power_supply/battery/mmi_charging_enable",
+        "/sys/class/power_supply/battery/store_mode",
+        "/sys/class/power_supply/batt_slate_mode/enabled",
+        "/sys/class/power_supply/battery/op_disable_charge"
     )
+    private val CURRENT_PATHS = listOf("/sys/class/power_supply/battery/current_now", "/sys/class/power_supply/battery/batt_current")
+    private val VOLT_PATHS = listOf("/sys/class/power_supply/battery/voltage_now", "/sys/class/power_supply/battery/batt_vol")
+    private val TEMP_PATHS = listOf("/sys/class/power_supply/battery/temp", "/sys/class/power_supply/battery/batt_temp")
 
     fun isRootGranted(): Boolean {
-        return try {
-            Shell.getShell().isRoot
-        } catch (e: Exception) {
-            false
-        }
+        return Shell.getShell().isRoot
     }
 
     fun setCharging(enable: Boolean): Boolean {
-        val path = getWorkingPath() ?: return false
-        val value = if (enable) "1" else "0" 
-        val cmd = "echo $value > $path"
-        return Shell.cmd(cmd).exec().isSuccess
-    }
-
-    fun getWorkingPath(): String? {
-        return CHARGING_PATHS.find { path ->
-            Shell.cmd("ls $path").exec().isSuccess
+        val value = if (enable) "1" else "0"
+        val altValue = if (enable) "0" else "1" 
+        
+        val commands = mutableListOf<String>()
+        
+        KNOWN_CONTROL_PATHS.forEach { path ->
+            if (Shell.cmd("ls $path").exec().isSuccess) {
+                commands.add("chmod 644 $path") 
+                commands.add("echo $value > $path")
+               
+                if (path.contains("suspend")) {
+                    commands.add("echo $altValue > $path")
+                }
+            }
         }
-    }
 
-    fun readSystemFile(path: String): String {
-        return try {
-            Shell.cmd("cat $path").exec().out.joinToString("").trim()
-        } catch (e: Exception) {
-            "0"
+        return Shell.cmd(*commands.toTypedArray()).exec().isSuccess
+    }
+    fun readSmart(type: String): String {
+        val paths = when (type) {
+            "current" -> CURRENT_PATHS
+            "volt" -> VOLT_PATHS
+            "temp" -> TEMP_PATHS
+            else -> listOf("/sys/class/power_supply/battery/capacity")
         }
+
+        for (path in paths) {
+            val output = Shell.cmd("cat $path").exec().out
+            if (output.isNotEmpty()) return output[0].trim()
+        }
+        return "0"
     }
 }
