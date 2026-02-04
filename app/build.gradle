@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace 'com.chargercontrol.fas'
+    namespace 'com.chargercontrol'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.chargercontrol.fas"
+        applicationId "com.chargercontrol"
         minSdk 24
         targetSdk 34
         versionCode 1
