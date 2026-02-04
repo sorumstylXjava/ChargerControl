@@ -1,4 +1,4 @@
-package com.chargercontrol.fas
+package com.chargercontrol
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,9 +11,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.chargercontrol.fas.ui.components.FloatingNavBar
-import com.chargercontrol.fas.ui.screens.*
-import com.chargercontrol.fas.ui.theme.ChargerControlTheme
+import com.chargercontrol.ui.components.FloatingNavBar
+import com.chargercontrol.ui.screens.*
+import com.chargercontrol.ui.theme.ChargerControlTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
