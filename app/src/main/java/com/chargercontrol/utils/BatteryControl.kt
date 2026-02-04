@@ -1,4 +1,4 @@
-package com.chargercontrol.fas.utils
+package com.chargercontrol.utils
 
 import java.io.DataOutputStream
 
