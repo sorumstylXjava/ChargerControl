@@ -16,7 +16,7 @@ import com.chargercontrol.fas.ui.components.LargeBatteryCard
 
 @Composable
 fun StatusScreen() {
-    Column(modifier = Modifier.fillMaxSize()) 
+    Column(modifier = Modifier.fillMaxSize()) {
         Surface(
             color = Color(0xFF2196F3),
             modifier = Modifier.fillMaxWidth().height(80.dp)
