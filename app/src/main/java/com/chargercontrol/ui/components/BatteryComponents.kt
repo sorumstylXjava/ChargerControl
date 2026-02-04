@@ -1,5 +1,6 @@
 package com.chargercontrol.ui.components
 
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
