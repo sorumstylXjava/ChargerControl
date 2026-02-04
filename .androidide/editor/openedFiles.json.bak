@@ -1,0 +1,20 @@
+{
+  "allFiles": [
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/Charger Control/app/build.gradle",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 1669,
+          "line": 68
+        },
+        "start": {
+          "column": 0,
+          "index": 1,
+          "line": 1
+        }
+      }
+    }
+  ],
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/Charger Control/app/build.gradle"
+}
