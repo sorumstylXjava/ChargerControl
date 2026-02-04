@@ -1,4 +1,4 @@
-package com.chargercontrol.fas.ui.components
+package com.chargercontrol.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
