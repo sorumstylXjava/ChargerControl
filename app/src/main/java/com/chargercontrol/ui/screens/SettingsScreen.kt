@@ -51,7 +51,7 @@ fun SettingsScreen() {
                     Text("Developer Name")
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(onClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/YOUR_USERNAME"))
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/Java_diks"))
                         context.startActivity(intent)
                     }) {
                         Text("Contact Telegram")
