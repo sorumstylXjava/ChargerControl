@@ -1,4 +1,4 @@
-package com.chargercontrol.fas.ui.screens
+package com.chargercontrol.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
@@ -11,8 +11,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.chargercontrol.fas.ui.components.InfoCard
-import com.chargercontrol.fas.ui.components.LargeBatteryCard
+import com.chargercontrol.ui.components.InfoCard
+import com.chargercontrol.ui.components.LargeBatteryCard
 
 @Composable
 fun StatusScreen() {
