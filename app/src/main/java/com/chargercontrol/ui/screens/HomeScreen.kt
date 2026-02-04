@@ -26,12 +26,13 @@ fun HomeScreen() {
         Spacer(Modifier.height(40.dp))
         Box(contentAlignment = Alignment.Center) {
             CircularProgressIndicator(
-    progress = { limit / 100f }, 
-    modifier = Modifier.size(200.dp),
-    color = if (isApplied) Color(0xFF00E676) else Color(0xFF2196F3),
-    strokeWidth = 12.dp,
-    trackColor = Color(0xFF252525)
-)
+               progress = limit / 100f, 
+               modifier = Modifier.size(200.dp),
+               color = if (isApplied) Color(0xFF00E676) else Color(0xFF2196F3),
+               strokeWidth = 12.dp,
+               trackColor = Color(0xFF252525)
+               )
+
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("${limit.toInt()}%", color = Color.White, fontSize = 42.sp, fontWeight = FontWeight.Bold)
                 if (isApplied) Text("Active", color = Color(0xFF00E676), fontSize = 14.sp)
