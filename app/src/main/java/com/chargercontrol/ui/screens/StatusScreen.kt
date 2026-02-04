@@ -1,10 +1,12 @@
 package com.chargercontrol.ui.screens
 
+import android.widget.Toast // Buat Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.RoundedCornerShape // Tambahkan ini
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -12,22 +14,30 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext // Buat Toast
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp // Tambahkan ini
 import com.chargercontrol.ui.components.*
 import com.chargercontrol.utils.RootUtils
 import kotlinx.coroutines.delay
 
 @Composable
 fun StatusScreen() {
+    val context = LocalContext.current
     var batteryData by remember { mutableStateOf(mapOf("level" to 0, "volt" to 0, "temp" to 0, "curr" to 0)) }
     val currentHistory = remember { mutableStateListOf<Int>() }
 
+    // Warna Custom biar gak error
+    val ColorOrange = Color(0xFFFFA500)
+    val ColorPink = Color(0xFFFF69B4)
+
     LaunchedEffect(Unit) {
         while (true) {
-            val v = RootUtils.readSystemFile("/sys/class/power_supply/battery/voltage_now").toIntOrNull() ?: 0
-            val c = RootUtils.readSystemFile("/sys/class/power_supply/battery/current_now").toIntOrNull() ?: 0
-            val t = RootUtils.readSystemFile("/sys/class/power_supply/battery/temp").toIntOrNull() ?: 0
-            val l = RootUtils.readSystemFile("/sys/class/power_supply/battery/capacity").toIntOrNull() ?: 0
+            // PAKAI readSmart SESUAI RootUtils YANG BARU
+            val v = RootUtils.readSmart("volt").toIntOrNull() ?: 0
+            val c = RootUtils.readSmart("current").toIntOrNull() ?: 0
+            val t = RootUtils.readSmart("temp").toIntOrNull() ?: 0
+            val l = RootUtils.readSmart("level").toIntOrNull() ?: 0
             
             batteryData = mapOf("level" to l, "volt" to v/1000, "temp" to t/10, "curr" to c/1000)
             currentHistory.add(c/1000)
@@ -54,8 +64,8 @@ fun StatusScreen() {
         }
 
         item { StatusCard(Icons.Default.BatteryFull, "Current Capacity", "3850", "mAh", Color.Magenta) }
-        item { StatusCard(Icons.Default.Thermostat, "Temperature", "${batteryData["temp"]}", "°C", Color.Orange) }
-        item { StatusCard(Icons.Default.Favorite, "Battery Health", "Good", iconColor = Color.Pink) }
+        item { StatusCard(Icons.Default.Thermostat, "Temperature", "${batteryData["temp"]}", "°C", ColorOrange) } // Pake variabel
+        item { StatusCard(Icons.Default.Favorite, "Battery Health", "Good", iconColor = ColorPink) } // Pake variabel
         item { StatusCard(Icons.Default.Settings, "Battery Type", "Li-poly", iconColor = Color.Cyan) }
 
         item(span = { GridItemSpan(2) }) {
@@ -71,7 +81,8 @@ fun StatusScreen() {
                             Text("Current", color = Color.Gray, fontSize = 12.sp)
                             Text("${batteryData["curr"]} mA", fontSize = 24.sp, color = Color.White)
                         }
-                        Text("Watt: ${( (batteryData["volt"] ?: 0) * (batteryData["curr"] ?: 0) / 1000f )} W", color = Color.White)
+                        val watt = ( (batteryData["volt"] ?: 0).toFloat() * (batteryData["curr"] ?: 0).toFloat() / 1000000f )
+                        Text("Watt: %.2f W".format(watt), color = Color.White)
                     }
                     RealTimeGraph(currentHistory.toList())
                 }
