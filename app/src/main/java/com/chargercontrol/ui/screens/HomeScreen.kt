@@ -49,20 +49,25 @@ fun HomeScreen() {
             shape = RoundedCornerShape(24.dp)
         ) {
             Row(
-                modifier = Modifier.padding(20.dp).fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Enable charge control", fontSize = 18.sp, color = Color.White)
-                Switch(
-                    checked = enabledState.value, 
-                    onCheckedChange = { isChecked ->
-                        scope.launch { 
-                            prefs.setEnabled(isChecked)
-                            val msg = if(isChecked) "Control Enabled ✅" else "Control Disabled ❌"
-                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
-                        } 
-                    }
+    modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
+    horizontalArrangement = Arrangement.SpaceEvenly
+) {
+    Button(
+        onClick = { BatteryControl.stopCharging() }, 
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5252)),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Text("STOP CHARGE", color = Color.White)
+    }
+
+    Button(
+        onClick = { BatteryControl.resumeCharging() }, 
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2979FF)),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Text("RESUME", color = Color.White)
+    }
+}
                 )
             }
         }
