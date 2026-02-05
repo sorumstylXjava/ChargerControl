@@ -30,10 +30,11 @@ fun HomeScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0F0F0F)) 
+            .background(Color(0xFF0F0F0F)) // Black Material 3 background
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
+        // --- 1. BANNER / AD PLACEHOLDER ---
         Card(
             modifier = Modifier.fillMaxWidth().height(100.dp),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
@@ -45,10 +46,12 @@ fun HomeScreen() {
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        // --- 2. MAIN CONTROL (XIAOMI, SAMSUNG, INFINIX SUPPORT) ---
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
-            shape = RoundedCornerShape(28.dp) 
+            shape = RoundedCornerShape(28.dp) // Lebih bulat sesuai request
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 Text("Manual Control", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
@@ -90,6 +93,7 @@ fun HomeScreen() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // --- 3. BATTERY LIMIT SLIDER ---
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
@@ -105,6 +109,61 @@ fun HomeScreen() {
                 }
                 
                 Spacer(modifier = Modifier.height(16.dp))
+                
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
+                    LimitDisplay("70", "Min")
+                    LimitDisplay(limitState.value.toString(), "Target")
+                }
+
+                Slider(
+                    value = limitState.value.toFloat(),
+                    onValueChange = { scope.launch { prefs.setLimit(it.toInt()) } },
+                    valueRange = 70f..100f,
+                    modifier = Modifier.padding(vertical = 12.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // --- 4. DEVICE INFO ---
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+            shape = RoundedCornerShape(28.dp)
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                InfoRow("Device Status", if (enabledState.value) "Active" else "Idle", Color(0xFF00E676))
+                InfoRow("Config Path", "Auto-Detecting...", Color.Gray)
+                InfoRow("Root Access", "Granted", Color.Cyan)
+            }
+        }
+
+        // Space biar nggak ketutup Floating Nav di pojok
+        Spacer(modifier = Modifier.height(120.dp))
+    }
+}
+
+// --- FUNGSI HELPER (Hanya boleh ada SATU di bawah sini) ---
+
+@Composable
+fun InfoRow(label: String, value: String, valueColor: Color = Color.White) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(label, color = Color.Gray)
+        Text(value, color = valueColor, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+fun LimitDisplay(value: String, sub: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(value, fontSize = 42.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+        Text(sub, fontSize = 12.sp, color = Color.Gray)
+    }
+}
                 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
                     LimitDisplay("70", "Min")
