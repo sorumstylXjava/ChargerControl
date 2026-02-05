@@ -1,42 +1,12 @@
 {
   "allFiles": [
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/Charger Control/build.gradle",
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/StatusScreen.kt",
       "selection": {
         "end": {
-          "column": 1,
-          "index": 363,
-          "line": 9
-        },
-        "start": {
           "column": 0,
           "index": 0,
           "line": 0
-        }
-      }
-    },
-    {
-      "file": "/storage/emulated/0/AndroidIDEProjects/Charger Control/gradle.properties",
-      "selection": {
-        "end": {
-          "column": 32,
-          "index": 1357,
-          "line": 22
-        },
-        "start": {
-          "column": 0,
-          "index": 0,
-          "line": 0
-        }
-      }
-    },
-    {
-      "file": "/storage/emulated/0/AndroidIDEProjects/Charger Control/settings.gradle",
-      "selection": {
-        "end": {
-          "column": 15,
-          "index": 305,
-          "line": 18
         },
         "start": {
           "column": 0,
@@ -46,5 +16,5 @@
       }
     }
   ],
-  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/Charger Control/settings.gradle"
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/StatusScreen.kt"
 }
