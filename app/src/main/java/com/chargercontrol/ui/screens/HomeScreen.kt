@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,7 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chargercontrol.data.Prefs
-import com.chargercontrol.utils.RootUtils
+import com.chargercontrol.utils.BatteryControl 
 import kotlinx.coroutines.launch
 
 @Composable
@@ -28,16 +30,38 @@ fun HomeScreen() {
     val enabledState = prefs.enabledFlow.collectAsState(initial = false)
 
     Column(
-        modifier = Modifier.fillMaxSize().background(Color.Black)
-            .verticalScroll(rememberScrollState()).padding(16.dp)
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF0F0F0F)) 
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp)
     ) {
         Card(
-            modifier = Modifier.fillMaxWidth().height(120.dp),
+            modifier = Modifier.fillMaxWidth().height(100.dp),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
             shape = RoundedCornerShape(24.dp)
         ) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                 Text("RDX8 Ad Placeholder", color = Color.Gray)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+            shape = RoundedCornerShape(24.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(20.dp).fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Enable charge control", color = Color.White, fontSize = 18.sp)
+                Switch(
+                    checked = enabledState.value,
+                    onCheckedChange = { scope.launch { prefs.setEnabled(it) } }
+                )
             }
         }
 
@@ -48,32 +72,42 @@ fun HomeScreen() {
             colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
             shape = RoundedCornerShape(24.dp)
         ) {
-            Row(
-    modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
-    horizontalArrangement = Arrangement.SpaceEvenly
-) {
-    Button(
-        onClick = { BatteryControl.stopCharging() }, 
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5252)),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Text("STOP CHARGE", color = Color.White)
-    }
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Button(
+                        onClick = { 
+                            if(BatteryControl.stopCharging()) {
+                                Toast.makeText(context, "Charging Stopped 🛑", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "Root Access Required!", Toast.LENGTH_SHORT).show()
+                            }
+                        }, 
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5252)),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text("STOP CHARGE", fontWeight = FontWeight.Bold)
+                    }
 
-    Button(
-        onClick = { BatteryControl.resumeCharging() }, 
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2979FF)),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Text("RESUME", color = Color.White)
-    }
-}
-                )
+                    Button(
+                        onClick = { 
+                            BatteryControl.resumeCharging()
+                            Toast.makeText(context, "Charging Resumed ⚡", Toast.LENGTH_SHORT).show()
+                        }, 
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2979FF)),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text("RESUME", fontWeight = FontWeight.Bold)
+                    }
+                }
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
@@ -103,8 +137,31 @@ fun HomeScreen() {
                 Slider(
                     value = limitState.value.toFloat(),
                     onValueChange = { scope.launch { prefs.setLimit(it.toInt()) } },
-                    onValueChangeFinished = {
-                        Toast.makeText(context, "Limit set to ${limitState.value}%", Toast.LENGTH_SHORT).show()
+                    valueRange = 70f..100f,
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
+            }
+        }
+       
+        Spacer(modifier = Modifier.height(100.dp))
+    }
+}
+
+@Composable
+fun InfoRow(label: String, value: String, valueColor: Color = Color.White) {
+    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(label, color = Color.Gray)
+        Text(value, color = valueColor, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+fun LimitDisplay(value: String, sub: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(value, fontSize = 48.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        Text(sub, fontSize = 12.sp, color = Color.Gray)
+    }
+}
                     },
                     valueRange = 70f..100f,
                     modifier = Modifier.padding(vertical = 16.dp)
