@@ -3,7 +3,7 @@ package com.chargercontrol.ui.components
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.rounded.* 
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,21 +22,26 @@ fun FloatingNavBar(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 30.dp, vertical = 24.dp)
+            .padding(bottom = 30.dp) 
+            .height(80.dp), 
+        contentAlignment = Alignment.Center
     ) {
         Surface(
-            color = Color(0xFF1E1E1E),
-            shape = RoundedCornerShape(50),
-            shadowElevation = 12.dp,
-            modifier = Modifier.height(65.dp).fillMaxWidth()
+            color = Color(0xFF252525), 
+            shape = RoundedCornerShape(40.dp), 
+            shadowElevation = 10.dp,
+            modifier = Modifier
+                .width(280.dp) 
+                .height(60.dp)
         ) {
             Row(
+                modifier = Modifier.fillMaxSize(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                NavIconItem(Icons.Default.Home, "home", currentRoute) { navController.navigate("home") }
-                NavIconItem(Icons.Default.Dashboard, "status", currentRoute) { navController.navigate("status") }
-                NavIconItem(Icons.Default.Settings, "settings", currentRoute) { navController.navigate("settings") }
+                NavIconItem(Icons.Rounded.Home, "home", currentRoute) { navController.navigate("home") }
+                NavIconItem(Icons.Rounded.ElectricBolt, "status", currentRoute) { navController.navigate("status") }
+                NavIconItem(Icons.Rounded.Settings, "settings", currentRoute) { navController.navigate("settings") }
             }
         }
     }
@@ -45,12 +50,15 @@ fun FloatingNavBar(navController: NavController) {
 @Composable
 fun NavIconItem(icon: ImageVector, route: String, currentRoute: String?, onClick: () -> Unit) {
     val isSelected = currentRoute == route
+    val selectedColor = Color(0xFF00E676) 
+    val unselectedColor = Color.Gray
+
     IconButton(onClick = onClick) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = if (isSelected) Color(0xFF2196F3) else Color.Gray,
-            modifier = Modifier.size(if (isSelected) 30.dp else 26.dp)
+            tint = if (isSelected) selectedColor else unselectedColor,
+            modifier = Modifier.size(28.dp)
         )
     }
 }
