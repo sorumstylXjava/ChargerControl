@@ -20,10 +20,10 @@ import kotlin.math.sin
 
 @Composable
 fun LargeBatteryView(level: Int) {
-    val infinite = rememberInfiniteTransition()
+    val infinite = rememberInfiniteTransition(label = "")
     val wave by infinite.animateFloat(
         initialValue = 0f, targetValue = 2 * Math.PI.toFloat(),
-        animationSpec = infiniteRepeatable(tween(1000, easing = LinearEasing))
+        animationSpec = infiniteRepeatable(tween(1500, easing = LinearEasing)), label = ""
     )
 
     Box(
@@ -46,16 +46,17 @@ fun LargeBatteryView(level: Int) {
             }
             drawPath(path, Color(0xFF00E676))
         }
-        Text("$level%", color = Color.White, fontSize = 30.sp)
+        Text("$level%", color = Color.White, fontSize = 32.sp)
     }
 }
 
 @Composable
-fun StatusCard(icon: ImageVector, title: String, value: String, unit: String, iconColor: Color) {
-    Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF121212))) {
-        Column(Modifier.padding(15.dp).fillMaxWidth()) {
-            Icon(icon, null, tint = iconColor)
-            Text(title, color = Color.Gray, fontSize = 12.sp)
+fun StatusCard(icon: ImageVector, title: String, value: String, unit: String = "", iconColor: Color) {
+    Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF121212)), shape = RoundedCornerShape(16.dp)) {
+        Column(Modifier.padding(16.dp).fillMaxWidth()) {
+            Icon(icon, null, tint = iconColor, modifier = Modifier.size(24.dp))
+            Spacer(Modifier.height(8.dp))
+            Text(title, color = Color.Gray, fontSize = 11.sp)
             Text("$value $unit", color = Color.White, fontSize = 16.sp)
         }
     }
@@ -63,13 +64,12 @@ fun StatusCard(icon: ImageVector, title: String, value: String, unit: String, ic
 
 @Composable
 fun RealTimeGraph(points: List<Float>) {
-    Canvas(Modifier.fillMaxWidth().height(60.dp).padding(top = 10.dp)) {
+    Canvas(Modifier.fillMaxWidth().height(60.dp)) {
         if (points.size < 2) return@Canvas
         val path = Path()
         val max = points.maxOrNull() ?: 1f
         val min = points.minOrNull() ?: 0f
         val range = if (max - min == 0f) 1f else max - min
-        
         points.forEachIndexed { i, p ->
             val x = (i.toFloat() / (points.size - 1)) * size.width
             val y = size.height - ((p - min) / range) * size.height
