@@ -1,87 +1,136 @@
 package com.chargercontrol.ui.screens
 
-import android.widget.Toast 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.BatteryManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.shape.RoundedCornerShape 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext 
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chargercontrol.ui.components.*
-import com.chargercontrol.utils.RootUtils
-import kotlinx.coroutines.delay
+import kotlin.math.abs
 
 @Composable
 fun StatusScreen() {
     val context = LocalContext.current
-    var batteryData by remember { mutableStateOf(mapOf("level" to 0, "volt" to 0, "temp" to 0, "curr" to 0)) }
-    val currentHistory = remember { mutableStateListOf<Int>() }
-    val ColorOrange = Color(0xFFFFA500)
-    val ColorPink = Color(0xFFFF69B4)
+    var level by remember { mutableStateOf(0) }
+    var voltage by remember { mutableStateOf(0) }
+    var temp by remember { mutableStateOf(0f) }
+    var currentNow by remember { mutableStateOf(0L) }
+    var status by remember { mutableStateOf(0) }
+    var health by remember { mutableStateOf("Unknown") }
+    var technology by remember { mutableStateOf("Unknown") }
+    val graphData = remember { mutableStateListOf<Float>() }
 
-    LaunchedEffect(Unit) {
-        while (true) {
-            val v = RootUtils.readSmart("volt").toIntOrNull() ?: 0
-            val c = RootUtils.readSmart("current").toIntOrNull() ?: 0
-            val t = RootUtils.readSmart("temp").toIntOrNull() ?: 0
-            val l = RootUtils.readSmart("level").toIntOrNull() ?: 0
-            
-            batteryData = mapOf("level" to l, "volt" to v/1000, "temp" to t/10, "curr" to c/1000)
-            currentHistory.add(c/1000)
-            if (currentHistory.size > 20) currentHistory.removeAt(0)
-            delay(1000)
+    DisposableEffect(Unit) {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(ctx: Context, intent: Intent) {
+                level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
+                voltage = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0)
+                temp = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) / 10f
+                status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
+                technology = intent.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY) ?: "Li-ion"
+                
+                val h = intent.getIntExtra(BatteryManager.EXTRA_HEALTH, BatteryManager.BATTERY_HEALTH_UNKNOWN)
+                health = when(h) {
+                    BatteryManager.BATTERY_HEALTH_GOOD -> "Good"
+                    BatteryManager.BATTERY_HEALTH_OVERHEAT -> "Overheat"
+                    BatteryManager.BATTERY_HEALTH_DEAD -> "Dead"
+                    else -> "Weak"
+                }
+
+                val bm = ctx.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+                currentNow = bm.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
+                
+                val currentMA = currentNow / 1000f
+                graphData.add(currentMA)
+                if (graphData.size > 20) graphData.removeAt(0)
+            }
+        }
+        val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+        context.registerReceiver(receiver, filter)
+        onDispose {
+            context.unregisterReceiver(receiver)
         }
     }
 
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        modifier = Modifier.fillMaxSize().background(Color.Black).padding(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+    val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
+    val voltageV = voltage / 1000f
+    val currentA = currentNow / 1000000f
+    
+    var watt = voltageV * currentA
+    watt = if (isCharging) abs(watt) else -abs(watt)
+    
+    val currentDisplay = currentNow / 1000 
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF080808))
+            .padding(16.dp)
     ) {
-        item(span = { GridItemSpan(1) }) {
-            LargeBatteryView(batteryData["level"] ?: 0)
-        }
-        
-        item {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                StatusCard(Icons.Default.Timer, "Discharging Time", "measuring", iconColor = Color.Red)
-                StatusCard(Icons.Default.SettingsInputComponent, "Voltage", "${batteryData["volt"]}", "mV", Color.Blue)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            LargeBatteryView(percentage = level)
+            
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.width(180.dp)
+            ) {
+                StatusCard(Icons.Rounded.Timer, "Discharging Time", if(isCharging) "Charging" else "Measuring", "", Color.Red)
+                StatusCard(Icons.Rounded.Bolt, "Voltage", "$voltage", "mV", Color.Blue)
             }
         }
 
-        item { StatusCard(Icons.Default.BatteryFull, "Current Capacity", "3850", "mAh", Color.Magenta) }
-        item { StatusCard(Icons.Default.Thermostat, "Temperature", "${batteryData["temp"]}", "°C", ColorOrange) } // Pake variabel
-        item { StatusCard(Icons.Default.Favorite, "Battery Health", "Good", iconColor = ColorPink) } // Pake variabel
-        item { StatusCard(Icons.Default.Settings, "Battery Type", "Li-poly", iconColor = Color.Cyan) }
-
-        item(span = { GridItemSpan(2) }) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
-                shape = RoundedCornerShape(24.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Column {
-                            Icon(Icons.Default.Bolt, null, tint = Color.Blue)
-                            Text("Current", color = Color.Gray, fontSize = 12.sp)
-                            Text("${batteryData["curr"]} mA", fontSize = 24.sp, color = Color.White)
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            item { StatusCard(Icons.Rounded.BatteryFull, "Capacity", "Real-time", "", Color.Magenta) }
+            item { StatusCard(Icons.Rounded.Thermostat, "Temperature", "$temp", "°C", Color(0xFFFFA500)) }
+            item { StatusCard(Icons.Rounded.Favorite, "Health", health, "", Color(0xFFFF69B4)) }
+            item { StatusCard(Icons.Rounded.Settings, "Type", technology, "", Color.Cyan) }
+            
+            item(span = { GridItemSpan(2) }) {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+                    shape = RoundedCornerShape(24.dp),
+                    modifier = Modifier.padding(top = 8.dp)
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column {
+                                Text("Current", color = Color.Gray, fontSize = 12.sp)
+                                Text("${currentDisplay} mA", fontSize = 24.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                            }
+                            Text("Watt: ${String.format("%.2f", watt)} W", color = Color.White, fontSize = 16.sp)
                         }
-                        val watt = ( (batteryData["volt"] ?: 0).toFloat() * (batteryData["curr"] ?: 0).toFloat() / 1000000f )
-                        Text("Watt: %.2f W".format(watt), color = Color.White)
+                        RealTimeGraph(points = graphData)
                     }
-                    RealTimeGraph(currentHistory.toList())
                 }
             }
         }

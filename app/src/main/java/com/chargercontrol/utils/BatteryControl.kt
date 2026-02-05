@@ -1,42 +1,27 @@
 package com.chargercontrol.utils
 
-import java.io.File
-import java.io.DataOutputStream
+import android.os.Build
 
 object BatteryControl {
-    // List saklar charger untuk Samsung, Xiaomi, Infinix, Itel
-    private val PATHS = listOf(
-        "/sys/class/power_supply/battery/input_suspend",
-        "/sys/class/power_supply/battery/charging_enabled",
-        "/sys/class/power_supply/charger/enable_charger",
-        "/sys/class/power_supply/battery/batt_slate_soc",
-        "/sys/class/power_supply/battery/store_mode"
-    )
-
-    fun checkRoot(): Boolean {
-        return try {
-            val p = Runtime.getRuntime().exec("su -c id")
-            p.waitFor() == 0
-        } catch (e: Exception) { false }
+    init {
+        System.loadLibrary("native-lib")
     }
 
-    fun setCharging(on: Boolean): Boolean {
-        val value = if (on) "1" else "0"
-        val altValue = if (on) "0" else "1" 
+    external fun executeRoot(command: String): Int
+
+    fun setChargingEnabled(enable: Boolean) {
+        val value = if (enable) "1" else "0"
+        val path = if (Build.MANUFACTURER.equals("Xiaomi", ignoreCase = true)) {
+            "/sys/class/power_supply/battery/input_suspend" 
+        } else {
+            "/sys/class/power_supply/battery/charging_enabled"
+        }
         
-        return try {
-            val p = Runtime.getRuntime().exec("su")
-            val os = DataOutputStream(p.outputStream)
-            PATHS.forEach { path ->
-                if (File(path).exists()) {
-                    os.writeBytes("chmod 666 $path\n")
-                    os.writeBytes("echo $value > $path\n")
-                    os.writeBytes("echo $altValue > $path\n")
-                }
-            }
-            os.writeBytes("exit\n")
-            os.flush()
-            p.waitFor() == 0
-        } catch (e: Exception) { false }
+        val cmd = if (Build.MANUFACTURER.equals("Xiaomi", ignoreCase = true)) {
+             "su -c 'echo ${if(enable) 0 else 1} > $path'"
+        } else {
+             "su -c 'echo $value > $path'"
+        }
+        executeRoot(cmd)
     }
 }
