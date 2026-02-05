@@ -2,6 +2,7 @@ package com.chargercontrol.ui.screens
 
 import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,29 +28,27 @@ fun HomeScreen() {
     val scope = rememberCoroutineScope()
     val prefs = remember { Prefs(context) }
     
-    // State Management
     val isEnabled by prefs.enabledFlow.collectAsState(initial = false)
     var isBypassActive by remember { mutableStateOf(false) }
-    val isRooted = remember { mutableStateOf(BatteryControl.checkRoot()) }
+    
+    // Memberikan tipe data Boolean eksplisit agar Kotlin tidak bingung (Fix Error T)
+    val isRooted = remember { mutableStateOf<Boolean>(BatteryControl.checkRoot()) }
 
-    // Animasi warna berdasarkan status Engine
     val engineColor by animateColorAsState(
         targetValue = if (isEnabled) Color(0xFF00E676) else Color(0xFFE53935),
         label = "engineColor"
     )
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF080808))
-            .padding(24.dp)
+        modifier = Modifier.fillMaxSize().background(Color(0xFF080808)).padding(24.dp)
     ) {
-        // --- HEADER: RDX8 ENGINE STATUS ---
+        // --- HEADER: RDX8 ENGINE ---
         Surface(
             modifier = Modifier.fillMaxWidth().height(110.dp),
             color = Color(0xFF1A1A1A),
             shape = RoundedCornerShape(32.dp),
-            border = AssistChipDefaults.assistChipBorder(borderColor = engineColor.copy(alpha = 0.5f))
+            // Fix Error: Menggunakan BorderStroke, bukan AssistChipBorder
+            border = BorderStroke(1.dp, engineColor.copy(alpha = 0.5f))
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 24.dp),
@@ -57,114 +56,72 @@ fun HomeScreen() {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
-                    Text(
-                        text = if (isEnabled) "RDX8 ACTIVE" else "RDX8 STOPPED",
-                        color = engineColor,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 22.sp
-                    )
-                    Text("Automatic Control Mode", color = Color.Gray, fontSize = 12.sp)
+                    Text("RDX8 ENGINE", color = engineColor, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp)
+                    Text(if (isEnabled) "STATUS: ACTIVE" else "STATUS: STOPPED", color = Color.Gray, fontSize = 12.sp)
                 }
                 Switch(
                     checked = isEnabled,
                     onCheckedChange = { scope.launch { prefs.saveEnabled(it) } },
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = Color(0xFF00E676),
-                        checkedTrackColor = Color(0xFF00E676).copy(alpha = 0.3f)
-                    )
+                    colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFF00E676))
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- BYPASS CONTROL CARD ---
+        // --- BYPASS CARD ---
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF121212)),
             shape = RoundedCornerShape(32.dp)
         ) {
             Column(modifier = Modifier.padding(24.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Rounded.ElectricBolt, null, tint = Color(0xFF2196F3), modifier = Modifier.size(24.dp))
-                    Spacer(Modifier.width(12.dp))
-                    Text("Manual Bypass", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                }
-                
-                Text(
-                    "Memutus arus pengisian selama 5 detik untuk kalibrasi sirkuit.",
-                    color = Color.Gray,
-                    fontSize = 13.sp,
-                    modifier = Modifier.padding(vertical = 16.dp)
-                )
-
+                Text("Manual Bypass", color = Color.White, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(16.dp))
                 Button(
                     onClick = {
                         scope.launch {
                             isBypassActive = true
                             BatteryControl.setCharging(false)
-                            Toast.makeText(context, "Bypass: Arus Diputus", Toast.LENGTH_SHORT).show()
                             delay(5000)
                             BatteryControl.setCharging(true)
                             isBypassActive = false
-                            Toast.makeText(context, "Bypass: Selesai", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Bypass RDX8 Selesai", Toast.LENGTH_SHORT).show()
                         }
                     },
                     enabled = !isBypassActive,
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isBypassActive) Color.DarkGray else Color(0xFF2196F3)
-                    )
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3))
                 ) {
-                    if (isBypassActive) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp)
-                        Spacer(Modifier.width(12.dp))
-                        Text("PROCESSING...")
-                    } else {
-                        Text("JALANKAN BYPASS (5s)", fontWeight = FontWeight.Bold)
-                    }
+                    Text(if (isBypassActive) "PROCESSING..." else "RUN BYPASS (5s)")
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- SYSTEM INFO CARD ---
+        // --- INFO CARD ---
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF121212)),
             shape = RoundedCornerShape(32.dp)
         ) {
             Column(modifier = Modifier.padding(24.dp)) {
-                Text("Device & System", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                SystemInfoRow(Icons.Rounded.Smartphone, "Manufacturer", android.os.Build.MANUFACTURER.uppercase())
-                SystemInfoRow(Icons.Rounded.Memory, "Model", android.os.Build.MODEL)
-                SystemInfoRow(
-                    Icons.Rounded.Shield, 
-                    "Root Access", 
-                    if(isRooted.value) "GRANTED" else "DENIED",
-                    if(isRooted.value) Color(0xFF00E676) else Color(0xFFE53935)
-                )
+                InfoRow("Manufacturer", android.os.Build.MANUFACTURER.uppercase())
+                InfoRow("Root Status", if(isRooted.value) "GRANTED" else "DENIED")
             }
         }
     }
 }
 
 @Composable
-fun SystemInfoRow(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, value: String, valueColor: Color = Color.White) {
+fun InfoRow(label: String, value: String) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, null, tint = Color.Gray, modifier = Modifier.size(18.dp))
-            Spacer(Modifier.width(12.dp))
-            Text(label, color = Color.Gray, fontSize = 14.sp)
-        }
-        Text(value, color = valueColor, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+        Text(label, color = Color.Gray, fontSize = 14.sp)
+        Text(value, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
     }
 }

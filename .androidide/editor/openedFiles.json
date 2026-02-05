@@ -1,47 +1,17 @@
 {
   "allFiles": [
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/utils/BatteryControl.kt",
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/cpp/CMakeLists.txt",
       "selection": {
         "end": {
-          "column": 0,
-          "index": 607,
-          "line": 22
+          "column": 38,
+          "index": 38,
+          "line": 0
         },
         "start": {
-          "column": 0,
-          "index": 607,
-          "line": 22
-        }
-      }
-    },
-    {
-      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/components/BatteryComponents.kt",
-      "selection": {
-        "end": {
-          "column": 0,
-          "index": 2991,
-          "line": 79
-        },
-        "start": {
-          "column": 0,
-          "index": 2991,
-          "line": 79
-        }
-      }
-    },
-    {
-      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/StatusScreen.kt",
-      "selection": {
-        "end": {
-          "column": 9,
-          "index": 2529,
-          "line": 57
-        },
-        "start": {
-          "column": 9,
-          "index": 2529,
-          "line": 57
+          "column": 38,
+          "index": 38,
+          "line": 0
         }
       }
     },
@@ -49,32 +19,32 @@
       "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/HomeScreen.kt",
       "selection": {
         "end": {
-          "column": 13,
-          "index": 3083,
-          "line": 81
+          "column": 0,
+          "index": 5089,
+          "line": 127
         },
         "start": {
-          "column": 13,
-          "index": 3083,
-          "line": 81
+          "column": 0,
+          "index": 5089,
+          "line": 127
         }
       }
     },
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/build.gradle",
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/utils/BatteryControl.kt",
       "selection": {
         "end": {
-          "column": 65,
-          "index": 1510,
-          "line": 49
+          "column": 0,
+          "index": 276,
+          "line": 12
         },
         "start": {
-          "column": 65,
-          "index": 1510,
-          "line": 49
+          "column": 0,
+          "index": 276,
+          "line": 12
         }
       }
     }
   ],
-  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/HomeScreen.kt"
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/utils/BatteryControl.kt"
 }
