@@ -51,7 +51,6 @@ fun LargeBatteryCard(percentage: String, status: String) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Visualisasi Baterai Hijau
             Box(
                 modifier = Modifier
                     .size(80.dp, 120.dp)
@@ -61,7 +60,7 @@ fun LargeBatteryCard(percentage: String, status: String) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .fillMaxHeight(0.62f) // Contoh 62%
+                        .fillMaxHeight(0.62f) 
                         .align(Alignment.BottomCenter)
                         .background(Color(0xFF00E676), RoundedCornerShape(4.dp))
                 )
