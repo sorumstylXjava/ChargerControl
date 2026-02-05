@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.sp
 import kotlin.math.sin
 
 @Composable
-fun LargeBatteryView(level: Int) {
+fun LargeBatteryView(level: Int) { // Parameter level
     val infinite = rememberInfiniteTransition(label = "")
     val wave by infinite.animateFloat(
         initialValue = 0f, targetValue = 2 * Math.PI.toFloat(),
@@ -52,11 +52,10 @@ fun LargeBatteryView(level: Int) {
 
 @Composable
 fun StatusCard(icon: ImageVector, title: String, value: String, unit: String = "", iconColor: Color) {
-    Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF121212)), shape = RoundedCornerShape(16.dp)) {
+    Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF121212))) {
         Column(Modifier.padding(16.dp).fillMaxWidth()) {
-            Icon(icon, null, tint = iconColor, modifier = Modifier.size(24.dp))
-            Spacer(Modifier.height(8.dp))
-            Text(title, color = Color.Gray, fontSize = 11.sp)
+            Icon(icon, null, tint = iconColor)
+            Text(title, color = Color.Gray, fontSize = 12.sp)
             Text("$value $unit", color = Color.White, fontSize = 16.sp)
         }
     }
