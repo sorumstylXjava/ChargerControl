@@ -1,52 +1,42 @@
 package com.chargercontrol.utils
 
+import java.io.File
 import java.io.DataOutputStream
-import java.io.IOException
 
 object BatteryControl {
-    private val CHARGING_CONTROL_PATHS = listOf(
-        "/sys/class/power_supply/battery/input_suspend", 
-        "/sys/class/power_supply/battery/charging_enabled", 
-        "/sys/class/power_supply/usb/device/charge", 
-        "/sys/class/power_supply/battery/batt_slate_soc", 
-        "/sys/class/power_supply/main/charge_control_limit", 
-        "/sys/class/power_supply/charger/enable_charger", 
-        "/sys/class/power_supply/battery/mmi_charging_enable",
-        "/sys/module/qpnp_smb5/parameters/disable_input_suspend"
+    // List saklar charger untuk Samsung, Xiaomi, Infinix, Itel
+    private val PATHS = listOf(
+        "/sys/class/power_supply/battery/input_suspend",
+        "/sys/class/power_supply/battery/charging_enabled",
+        "/sys/class/power_supply/charger/enable_charger",
+        "/sys/class/power_supply/battery/batt_slate_soc",
+        "/sys/class/power_supply/battery/store_mode"
     )
 
-    fun stopCharging(): Boolean {
-        return executeRootCommand(
-            "echo 1 > /sys/class/power_supply/battery/input_suspend", 
-            "echo 0 > /sys/class/power_supply/battery/charging_enabled", 
-            "echo 0 > /sys/class/power_supply/charger/enable_charger" 
-        )
+    fun checkRoot(): Boolean {
+        return try {
+            val p = Runtime.getRuntime().exec("su -c id")
+            p.waitFor() == 0
+        } catch (e: Exception) { false }
     }
 
-    fun resumeCharging(): Boolean {
-        return executeRootCommand(
-            "echo 0 > /sys/class/power_supply/battery/input_suspend", 
-            "echo 1 > /sys/class/power_supply/battery/charging_enabled", 
-            "echo 1 > /sys/class/power_supply/charger/enable_charger" 
-        )
-    }
-    private fun executeRootCommand(vararg commands: String): Boolean {
+    fun setCharging(on: Boolean): Boolean {
+        val value = if (on) "1" else "0"
+        val altValue = if (on) "0" else "1" 
+        
         return try {
-            val process = Runtime.getRuntime().exec("su")
-            val os = DataOutputStream(process.outputStream)
-            for (cmd in commands) {
-                os.writeBytes("$cmd\n")
+            val p = Runtime.getRuntime().exec("su")
+            val os = DataOutputStream(p.outputStream)
+            PATHS.forEach { path ->
+                if (File(path).exists()) {
+                    os.writeBytes("chmod 666 $path\n")
+                    os.writeBytes("echo $value > $path\n")
+                    os.writeBytes("echo $altValue > $path\n")
+                }
             }
             os.writeBytes("exit\n")
             os.flush()
-            process.waitFor()
-            true
-        } catch (e: IOException) {
-            e.printStackTrace()
-            false
-        } catch (e: InterruptedException) {
-            e.printStackTrace()
-            false
-        }
+            p.waitFor() == 0
+        } catch (e: Exception) { false }
     }
 }
