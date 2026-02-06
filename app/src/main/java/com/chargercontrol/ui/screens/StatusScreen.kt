@@ -24,7 +24,6 @@ import com.chargercontrol.utils.BatteryControl
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlin.math.abs
 
 @Composable
 fun StatusScreen() {
@@ -37,7 +36,7 @@ fun StatusScreen() {
     var tech by remember { mutableStateOf("Li-ion") }
     var currentMA by remember { mutableStateOf(0f) }
     var powerSource by remember { mutableStateOf("Battery") }
-    var capacity by remember { mutableStateOf("0") }
+    var capacity by remember { mutableStateOf("N/A") }
     var cycleCount by remember { mutableStateOf("N/A") }
     var watts by remember { mutableStateOf(0f) }
     
@@ -46,28 +45,36 @@ fun StatusScreen() {
     LaunchedEffect(Unit) {
         while(true) {
             val intent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-            intent?.let {
-                level = it.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
-                temp = it.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) / 10f
-                volt = it.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0)
-                tech = it.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY) ?: "Li-ion"
-                health = BatteryControl.getBatteryHealth(context)
-                
-                val ps = it.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0)
-                powerSource = if (ps > 0) "Charging" else "Discharging"
-            }
-
+            
             withContext(Dispatchers.IO) {
-                currentMA = BatteryControl.getFormattedCurrent(context)
-                watts = BatteryControl.getWattage(context)
-                capacity = BatteryControl.getDesignedCapacity(context)
-                cycleCount = BatteryControl.getCycleCount()
+                val rawCurrent = BatteryControl.getFormattedCurrent(context)
+                val rawWatt = BatteryControl.getWattage(context)
+                val rawCapacity = BatteryControl.getDesignedCapacity(context)
+                val rawCycle = BatteryControl.getCycleCount()
+                val rawHealth = BatteryControl.getBatteryHealth(context)
+
+                withContext(Dispatchers.Main) {
+                    currentMA = rawCurrent
+                    watts = rawWatt
+                    capacity = rawCapacity
+                    cycleCount = rawCycle
+                    health = rawHealth
+
+                    intent?.let {
+                        level = it.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
+                        temp = it.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) / 10f
+                        volt = it.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0)
+                        tech = it.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY) ?: "Li-ion"
+                        
+                        val ps = it.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0)
+                        powerSource = if (ps > 0) "Charging" else "Discharging"
+                    }
+
+                    currentHistory.add(currentMA)
+                    if (currentHistory.size > 50) currentHistory.removeAt(0)
+                }
             }
-
-            currentHistory.add(currentMA)
-            if (currentHistory.size > 50) currentHistory.removeAt(0)
-
-            delay(1000) 
+            delay(1000)
         }
     }
 
