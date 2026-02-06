@@ -28,30 +28,35 @@ fun HomeScreen() {
     val limit by prefs.limitFlow.collectAsState(initial = 100)
     var currentLevel by remember { mutableStateOf(0) }
     var bypassStatus by remember { mutableStateOf("NORMAL") }
-    var lastChargingState by remember { mutableStateOf<Boolean?>(null) }
+    var lastState by remember { mutableStateOf<Boolean?>(null) }
+    var isProcessing by remember { mutableStateOf(false) }
 
     LaunchedEffect(isEnabled, limit) {
         if (isEnabled) {
             while(true) {
-                currentLevel = BatteryControl.getBatteryLevel(context)
-                
-                val shouldEnableCharging = when {
-                    currentLevel >= limit -> false
-                    currentLevel <= (limit - 3) -> true
-                    else -> lastChargingState ?: true
-                }
+                if (!isProcessing) {
+                    currentLevel = BatteryControl.getBatteryLevel(context)
+                    
+                    val shouldEnableCharging = when {
+                        currentLevel >= limit -> false
+                        currentLevel <= (limit - 4) -> true
+                        else -> lastState ?: (currentLevel < limit)
+                    }
 
-                if (shouldEnableCharging != lastChargingState) {
-                    BatteryControl.setChargingLimit(shouldEnableCharging)
-                    lastChargingState = shouldEnableCharging
+                    if (shouldEnableCharging != lastState) {
+                        isProcessing = true
+                        BatteryControl.setChargingLimit(shouldEnableCharging)
+                        lastState = shouldEnableCharging
+                        delay(2000)
+                        isProcessing = false
+                    }
                 }
-                
                 delay(15000)
             }
         } else {
-            if (lastChargingState != true) {
+            if (lastState != true) {
                 BatteryControl.setChargingLimit(true)
-                lastChargingState = true
+                lastState = true
                 bypassStatus = "NORMAL"
             }
         }
@@ -74,11 +79,7 @@ fun HomeScreen() {
                 }
                 Switch(
                     checked = isEnabled,
-                    onCheckedChange = { 
-                        scope.launch { 
-                            prefs.setEnabled(it)
-                        } 
-                    },
+                    onCheckedChange = { scope.launch { prefs.setEnabled(it) } },
                     colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFF00E676))
                 )
             }
@@ -94,11 +95,7 @@ fun HomeScreen() {
             shape = RoundedCornerShape(24.dp)
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
-                Text(
-                    "Charging Limit", 
-                    color = if (isEnabled) Color.White else Color.Gray, 
-                    fontWeight = FontWeight.Bold
-                )
+                Text("Charging Limit", color = if (isEnabled) Color.White else Color.Gray, fontWeight = FontWeight.Bold)
                 Slider(
                     value = limit.toFloat(),
                     onValueChange = { scope.launch { prefs.setLimit(it.toInt()) } },
@@ -111,7 +108,7 @@ fun HomeScreen() {
                     )
                 )
                 Text(
-                    if (isEnabled) "Batas: $limit% (Akan mengisi lagi di ${limit - 3}%)" else "Aktifkan service untuk mengatur limit", 
+                    if (isEnabled) "Batas: $limit% (Mulai lagi di ${limit - 4}%)" else "Aktifkan service", 
                     color = Color.Gray, 
                     fontSize = 11.sp
                 )
@@ -131,47 +128,44 @@ fun HomeScreen() {
                 
                 Spacer(Modifier.height(16.dp))
                 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Button(
                         onClick = {
-                            if (isEnabled) {
-                                bypassStatus = "BYPASS ACTIVE"
-                                lastChargingState = false
-                                BatteryControl.setChargingLimit(false)
-                                Toast.makeText(context, "Bypass ON", Toast.LENGTH_SHORT).show()
-                            } else {
-                                Toast.makeText(context, "Aktifkan Service Dahulu", Toast.LENGTH_SHORT).show()
+                            if (isEnabled && !isProcessing) {
+                                scope.launch {
+                                    isProcessing = true
+                                    bypassStatus = "BYPASS ACTIVE"
+                                    lastState = false
+                                    BatteryControl.setChargingLimit(false)
+                                    Toast.makeText(context, "Bypass ON", Toast.LENGTH_SHORT).show()
+                                    delay(2000)
+                                    isProcessing = false
+                                }
                             }
                         },
                         modifier = Modifier.weight(1f).height(48.dp),
                         shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF1B5E20),
-                            contentColor = Color.White
-                        )
-                    ) {
-                        Text("ON", fontWeight = FontWeight.Bold)
-                    }
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1B5E20))
+                    ) { Text("ON", fontWeight = FontWeight.Bold) }
 
                     Button(
                         onClick = {
-                            bypassStatus = "NORMAL"
-                            lastChargingState = true
-                            BatteryControl.setChargingLimit(true)
-                            Toast.makeText(context, "Bypass OFF", Toast.LENGTH_SHORT).show()
+                            if (!isProcessing) {
+                                scope.launch {
+                                    isProcessing = true
+                                    bypassStatus = "NORMAL"
+                                    lastState = true
+                                    BatteryControl.setChargingLimit(true)
+                                    Toast.makeText(context, "Bypass OFF", Toast.LENGTH_SHORT).show()
+                                    delay(2000)
+                                    isProcessing = false
+                                }
+                            }
                         },
                         modifier = Modifier.weight(1f).height(48.dp),
                         shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFB71C1C),
-                            contentColor = Color.White
-                        )
-                    ) {
-                        Text("OFF", fontWeight = FontWeight.Bold)
-                    }
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C))
+                    ) { Text("OFF", fontWeight = FontWeight.Bold) }
                 }
             }
         }
