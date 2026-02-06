@@ -1,35 +1,35 @@
 {
   "allFiles": [
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/utils/BatteryControl.kt",
       "selection": {
         "end": {
           "column": 0,
-          "index": 270,
-          "line": 5
+          "index": 5798,
+          "line": 160
         },
         "start": {
           "column": 0,
-          "index": 270,
-          "line": 5
+          "index": 5798,
+          "line": 160
         }
       }
     },
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml",
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/SettingsScreen.kt",
       "selection": {
         "end": {
           "column": 0,
-          "index": 270,
-          "line": 5
+          "index": 11285,
+          "line": 265
         },
         "start": {
           "column": 0,
-          "index": 270,
-          "line": 5
+          "index": 11285,
+          "line": 265
         }
       }
     }
   ],
-  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml"
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/utils/BatteryControl.kt"
 }

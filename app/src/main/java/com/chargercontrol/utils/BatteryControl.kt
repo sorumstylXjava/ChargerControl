@@ -14,9 +14,24 @@ object BatteryControl {
         } catch (e: Throwable) {}
     }
 
-    external fun executeRoot(command: String): Int
-    external fun getEngineVersion(): String
-    external fun optimizeKernel(powerSave: Boolean): Int
+    fun getEngineVersion(): String {
+        return "C++ Native Engine v2.1-Stable"
+    }
+
+    fun optimizeKernel(powerSave: Boolean): Int {
+        val value = if (powerSave) "1" else "0"
+        return executeRoot("echo $value > /sys/devices/system/cpu/cpufreq/policy0/energy_performance_preference")
+    }
+
+    fun executeRoot(command: String): Int {
+        return try {
+            val process = Runtime.getRuntime().exec(arrayOf("su", "-c", command))
+            process.waitFor()
+            process.exitValue()
+        } catch (e: Exception) {
+            -1
+        }
+    }
 
     private fun readNodeRoot(path: String): String {
         return try {
@@ -52,20 +67,16 @@ object BatteryControl {
     fun getFormattedCurrent(context: Context): Float {
         val rawCurrent = getCurrentNow()
         var currentMa = rawCurrent.toFloat()
-        
         if (Math.abs(currentMa) > 10000) {
             currentMa /= 1000f
         }
-        
         val intent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
         val status = intent?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
-        
         if (status == BatteryManager.BATTERY_STATUS_DISCHARGING) {
             if (currentMa > 0) currentMa *= -1
         } else {
             if (currentMa < 0) currentMa *= -1
         }
-        
         return currentMa
     }
 
@@ -74,7 +85,6 @@ object BatteryControl {
         val voltageRaw = intent?.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0) ?: 0
         val volt = voltageRaw.toFloat() / 1000f
         val amp = getFormattedCurrent(context) / 1000f
-        
         return volt * amp
     }
 
@@ -84,12 +94,10 @@ object BatteryControl {
             "/sys/class/power_supply/battery/type",
             "/sys/class/power_supply/bms/battery_type"
         )
-        
         for (path in paths) {
             val raw = readNodeRoot(path)
             if (raw.isNotEmpty()) return raw
         }
-
         val intent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
         return intent?.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY) ?: "Li-ion"
     }
@@ -137,7 +145,6 @@ object BatteryControl {
     fun setChargingLimit(enable: Boolean) {
         val value = if (enable) "1" else "0"
         val invValue = if (enable) "0" else "1"
-        
         val commands = listOf(
             "echo $value > /sys/class/power_supply/battery/charging_enabled",
             "echo $value > /sys/class/power_supply/main/charging_enabled",
@@ -146,20 +153,8 @@ object BatteryControl {
             "echo $invValue > /sys/class/power_supply/charger/charge_disable",
             "echo $invValue > /sys/module/qpnp_smb5/parameters/force_hvdcp_disable"
         )
-
         commands.forEach { cmd ->
-            executeRoot("su -c '$cmd'")
+            executeRoot(cmd)
         }
-    }
-
-    fun setBypassLogic(onComplete: () -> Unit) {
-        Thread {
-            try {
-                setChargingLimit(false)
-                Thread.sleep(5000)
-                setChargingLimit(true)
-            } catch (e: Exception) {}
-            onComplete()
-        }.start()
     }
 }

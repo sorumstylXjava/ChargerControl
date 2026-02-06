@@ -215,7 +215,7 @@ fun SettingsScreen() {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text("Java_nih_deks", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
                     Text(BatteryControl.getEngineVersion(), color = Color(0xFF00E676), fontSize = 12.sp)
-                    Text("Battery Control v2.1", color = Color.Gray, fontSize = 13.sp)
+                    Text("Battery Control v1.0", color = Color.Gray, fontSize = 13.sp)
                     Spacer(modifier = Modifier.height(24.dp))
                     
                     Button(
