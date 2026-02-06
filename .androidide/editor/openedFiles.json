@@ -20,13 +20,28 @@
       "selection": {
         "end": {
           "column": 0,
-          "index": 6720,
+          "index": 6701,
           "line": 151
         },
         "start": {
           "column": 0,
-          "index": 6720,
+          "index": 6701,
           "line": 151
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/utils/BatteryControl.kt",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 1680,
+          "line": 56
+        },
+        "start": {
+          "column": 0,
+          "index": 1680,
+          "line": 56
         }
       }
     }

@@ -9,6 +9,7 @@ object BatteryControl {
     }
 
     external fun executeRoot(command: String): Int
+    external fun readNode(path: String): String
     
     private val nodes = listOf(
         "/sys/class/power_supply/battery/charging_enabled",
@@ -37,8 +38,19 @@ object BatteryControl {
         executeRoot("su -c 'chmod 666 $node && echo $value > $node'")
     }
 
+    fun getCycleCount(): String {
+        val cycleNodes = listOf(
+            "/sys/class/power_supply/battery/cycle_count",
+            "/sys/class/power_supply/bms/cycle_count"
+        )
+        for (node in cycleNodes) {
+            val count = try { readNode(node).trim() } catch (e: Exception) { "" }
+            if (count.isNotEmpty() && count != "-1") return count
+        }
+        return "N/A"
+    }
+
     fun formatCurrent(rawCurrent: Int): Int {
-        val currentMA = rawCurrent / 1000
-        return abs(currentMA) 
+        return rawCurrent / 1000
     }
 }

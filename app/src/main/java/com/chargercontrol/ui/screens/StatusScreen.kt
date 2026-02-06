@@ -143,7 +143,7 @@ fun StatusScreen() {
                 Column(Modifier.padding(20.dp)) {
                     Text("Live Current (mA)", color = Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.height(16.dp))
-                    RealTimeGraph(currentHistory.toList().map { it.toInt() }) 
+                    RealTimeGraph(currentHistory.toList()) 
                 }
             }
         }
