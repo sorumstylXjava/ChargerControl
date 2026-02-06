@@ -1,50 +1,35 @@
 {
   "allFiles": [
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/HomeScreen.kt",
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
       "selection": {
         "end": {
           "column": 0,
-          "index": 7840,
-          "line": 179
+          "index": 257,
+          "line": 5
         },
         "start": {
           "column": 0,
-          "index": 7840,
-          "line": 179
+          "index": 257,
+          "line": 5
         }
       }
     },
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/res/values/colors.xml",
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml",
       "selection": {
         "end": {
           "column": 0,
-          "index": 0,
-          "line": 0
+          "index": 257,
+          "line": 5
         },
         "start": {
           "column": 0,
-          "index": 0,
-          "line": 0
-        }
-      }
-    },
-    {
-      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/AndroidManifest.xml",
-      "selection": {
-        "end": {
-          "column": 35,
-          "index": 1042,
-          "line": 17
-        },
-        "start": {
-          "column": 35,
-          "index": 1042,
-          "line": 17
+          "index": 257,
+          "line": 5
         }
       }
     }
   ],
-  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/AndroidManifest.xml"
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml"
 }
