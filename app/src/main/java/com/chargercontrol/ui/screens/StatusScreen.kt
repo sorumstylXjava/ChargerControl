@@ -26,16 +26,17 @@ import kotlinx.coroutines.delay
 @Composable
 fun StatusScreen() {
     val context = LocalContext.current
+    
     var level by remember { mutableStateOf(0) }
     var temp by remember { mutableStateOf(0f) }
-    var volt by remember { mutableStateOf(0) } 
+    var volt by remember { mutableStateOf(0) }
     var health by remember { mutableStateOf("Unknown") }
     var tech by remember { mutableStateOf("Li-ion") }
     var currentRaw by remember { mutableStateOf(0) }
     var powerSource by remember { mutableStateOf("Battery") }
     var capacity by remember { mutableStateOf(0) }
     
-    val currentHistory = remember { mutableStateListOf<Int>() }
+    val currentHistory = remember { mutableStateListOf<Float>() }
 
     LaunchedEffect(Unit) {
         val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
@@ -50,7 +51,6 @@ fun StatusScreen() {
                 health = when(it.getIntExtra(BatteryManager.EXTRA_HEALTH, 0)) {
                     BatteryManager.BATTERY_HEALTH_GOOD -> "Good"
                     BatteryManager.BATTERY_HEALTH_OVERHEAT -> "Overheat"
-                    BatteryManager.BATTERY_HEALTH_COLD -> "Cold"
                     else -> "Normal"
                 }
 
@@ -58,17 +58,15 @@ fun StatusScreen() {
                 powerSource = when(ps) {
                     BatteryManager.BATTERY_PLUGGED_AC -> "AC Wall"
                     BatteryManager.BATTERY_PLUGGED_USB -> "USB Port"
-                    BatteryManager.BATTERY_PLUGGED_WIRELESS -> "Wireless"
                     else -> "Discharging"
                 }
                 
                 val bm = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
                 val now = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
                 currentRaw = now
-                
                 capacity = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER) / 1000
-                
-                val currentMA = BatteryControl.formatCurrent(now)
+
+                val currentMA = BatteryControl.formatCurrent(now).toFloat()
                 currentHistory.add(currentMA)
                 if (currentHistory.size > 30) currentHistory.removeAt(0)
             }
@@ -90,7 +88,8 @@ fun StatusScreen() {
                 modifier = Modifier.padding(vertical = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                LargeBatteryView(percentage = level)
+                
+                LargeBatteryView(level) 
                 Spacer(Modifier.height(8.dp))
                 Text(
                     text = if (powerSource == "Discharging") "BATTERY DISCHARGING" else "FAST CHARGING ACTIVE",
@@ -127,19 +126,19 @@ fun StatusScreen() {
         item { StatusCard(Icons.Rounded.Favorite, "Kesehatan", health, "", Color(0xFFFF4081)) }
         item { StatusCard(Icons.Rounded.Memory, "Teknologi", tech, "", Color.Magenta) }
         item { StatusCard(Icons.Rounded.Power, "Sumber", powerSource, "", Color.White) }
-        item { StatusCard(Icons.Rounded.Straighten, "Kapasitas", "$capacity", "mAh", Color.Orange) }
+        item { StatusCard(Icons.Rounded.Straighten, "Kapasitas", "$capacity", "mAh", Color(0xFFFFA500)) }
         item { StatusCard(Icons.Rounded.History, "Cycle", "N/A", "", Color.LightGray) }
         
         item(span = { GridItemSpan(2) }) {
             Card(
                 colors = CardDefaults.cardColors(containerColor = Color(0xFF121212)),
                 shape = RoundedCornerShape(24.dp),
-                modifier = Modifier.padding(bottom = 80.dp) 
+                modifier = Modifier.padding(bottom = 100.dp)
             ) {
                 Column(Modifier.padding(20.dp)) {
-                    Text("Live Current Consumption (mA)", color = Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text("Live Current (mA)", color = Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.height(16.dp))
-                    RealTimeGraph(points = currentHistory.toList()) 
+                    RealTimeGraph(currentHistory.toList()) 
                 }
             }
         }

@@ -39,7 +39,7 @@ fun SettingsScreen() {
             Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Info, null, tint = Color.White)
                 Spacer(modifier = Modifier.width(16.dp))
-                Text("App Information", color = Color.White, fontSize = 16.sp)
+                Text("Developer info", color = Color.White, fontSize = 16.sp)
             }
         }
     }
@@ -58,7 +58,7 @@ fun SettingsScreen() {
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text("Java_nih_deks", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                    Text("Charger Control Expert", color = Color.Gray, fontSize = 14.sp)
+                    Text("Chat dia jika anda menemukan bug", color = Color.Gray, fontSize = 14.sp)
                     Spacer(modifier = Modifier.height(24.dp))
                     Button(
                         onClick = {
