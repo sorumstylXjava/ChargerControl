@@ -5,13 +5,28 @@
       "selection": {
         "end": {
           "column": 0,
-          "index": 7017,
-          "line": 169
+          "index": 7412,
+          "line": 179
         },
         "start": {
           "column": 0,
-          "index": 7017,
-          "line": 169
+          "index": 7412,
+          "line": 179
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/data/prefs.kt",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 1625,
+          "line": 29
+        },
+        "start": {
+          "column": 0,
+          "index": 1625,
+          "line": 29
         }
       }
     }

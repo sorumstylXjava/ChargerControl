@@ -16,7 +16,7 @@ class Prefs(private val context: Context) {
     private val POWER_SAVE_KEY = booleanPreferencesKey("power_save")
 
     val enabledFlow: Flow<Boolean> = context.dataStore.data.map { it[ENABLED_KEY] ?: false }
-    val limitFlow: Flow<Int> = context.dataStore.data.map { it[LIMIT_KEY] ?: 80 }
+    val limitFlow: Flow<Int> = context.dataStore.data.map { it[LIMIT_KEY] ?: 100 }
     val thermalFlow: Flow<Boolean> = context.dataStore.data.map { it[THERMAL_KEY] ?: false }
     val maxTempFlow: Flow<Float> = context.dataStore.data.map { it[MAX_TEMP_KEY] ?: 40f }
     val powerSaveFlow: Flow<Boolean> = context.dataStore.data.map { it[POWER_SAVE_KEY] ?: false }
