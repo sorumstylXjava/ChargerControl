@@ -1,6 +1,5 @@
 package com.chargercontrol.ui.screens
 
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
@@ -52,6 +51,7 @@ fun StatusScreen() {
                 val rawCapacity = BatteryControl.getDesignedCapacity(context)
                 val rawCycle = BatteryControl.getCycleCount()
                 val rawHealth = BatteryControl.getBatteryHealth(context)
+                val rawTech = BatteryControl.getBatteryTechnology(context)
 
                 withContext(Dispatchers.Main) {
                     currentMA = rawCurrent
@@ -59,12 +59,12 @@ fun StatusScreen() {
                     capacity = rawCapacity
                     cycleCount = rawCycle
                     health = rawHealth
+                    tech = rawTech
 
                     intent?.let {
                         level = it.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
                         temp = it.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) / 10f
                         volt = it.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0)
-                        tech = it.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY) ?: "Li-ion"
                         
                         val ps = it.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0)
                         powerSource = if (ps > 0) "Charging" else "Discharging"

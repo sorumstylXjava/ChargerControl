@@ -4,8 +4,6 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chargercontrol.data.Prefs
 import com.chargercontrol.utils.BatteryControl
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -28,6 +27,19 @@ fun HomeScreen() {
     val isEnabled by prefs.enabledFlow.collectAsState(initial = false)
     val limit by prefs.limitFlow.collectAsState(initial = 80)
     var isBypassActive by remember { mutableStateOf(false) }
+    var currentLevel by remember { mutableStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        while(true) {
+            currentLevel = BatteryControl.getBatteryLevel(context)
+            if (isEnabled && currentLevel >= limit) {
+                BatteryControl.setChargingLimit(false)
+            } else if (isEnabled && currentLevel < limit) {
+                BatteryControl.setChargingLimit(true)
+            }
+            delay(5000)
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize().background(Color(0xFF080808)).padding(20.dp)) {
         Card(
@@ -91,7 +103,7 @@ fun HomeScreen() {
                         BatteryControl.setBypassLogic {
                             isBypassActive = false
                             scope.launch {
-                                Toast.makeText(context, "Bypass Selesai (5 detik)", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Bypass Cycle Completed", Toast.LENGTH_SHORT).show()
                             }
                         }
                     },
@@ -100,7 +112,7 @@ fun HomeScreen() {
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3))
                 ) {
-                    Text(if (isBypassActive) "BYPASSING (5s)..." else "AKTIFKAN BYPASS")
+                    Text(if (isBypassActive) "CALIBRATING (5s)..." else "RE-CALIBRATE BATTERY")
                 }
             }
         }
