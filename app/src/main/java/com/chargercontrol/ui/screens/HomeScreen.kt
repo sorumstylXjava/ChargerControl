@@ -1,8 +1,6 @@
 package com.chargercontrol.ui.screens
 
 import android.widget.Toast
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,99 +27,78 @@ fun HomeScreen() {
     val prefs = remember { Prefs(context) }
     
     val isEnabled by prefs.enabledFlow.collectAsState(initial = false)
+    val limit by prefs.limitFlow.collectAsState(initial = 80)
     var isBypassActive by remember { mutableStateOf(false) }
-    
-    // Memberikan tipe data Boolean eksplisit agar Kotlin tidak bingung (Fix Error T)
-    val isRooted = remember { mutableStateOf<Boolean>(BatteryControl.checkRoot()) }
 
-    val engineColor by animateColorAsState(
-        targetValue = if (isEnabled) Color(0xFF00E676) else Color(0xFFE53935),
-        label = "engineColor"
-    )
-
-    Column(
-        modifier = Modifier.fillMaxSize().background(Color(0xFF080808)).padding(24.dp)
-    ) {
-        // --- HEADER: RDX8 ENGINE ---
-        Surface(
-            modifier = Modifier.fillMaxWidth().height(110.dp),
-            color = Color(0xFF1A1A1A),
-            shape = RoundedCornerShape(32.dp),
-            // Fix Error: Menggunakan BorderStroke, bukan AssistChipBorder
-            border = BorderStroke(1.dp, engineColor.copy(alpha = 0.5f))
+    Column(modifier = Modifier.fillMaxSize().background(Color(0xFF080808)).padding(20.dp)) {
+        Card(
+            modifier = Modifier.fillMaxWidth().height(100.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
+            shape = RoundedCornerShape(24.dp)
         ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 24.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+            Row(Modifier.fillMaxSize().padding(20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
-                    Text("RDX8 ENGINE", color = engineColor, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp)
-                    Text(if (isEnabled) "STATUS: ACTIVE" else "STATUS: STOPPED", color = Color.Gray, fontSize = 12.sp)
+                    Text("RDX8 ENGINE", color = if(isEnabled) Color(0xFF00E676) else Color.Red, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
+                    Text("Status: ${if(isEnabled) "RUNNING" else "STOPPED"}", color = Color.Gray, fontSize = 12.sp)
                 }
-                Switch(
-                    checked = isEnabled,
-                    onCheckedChange = { scope.launch { prefs.saveEnabled(it) } },
-                    colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFF00E676))
-                )
+                Switch(checked = isEnabled, onCheckedChange = { scope.launch { prefs.saveEnabled(it) } })
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // --- BYPASS CARD ---
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF121212)),
-            shape = RoundedCornerShape(32.dp)
+            shape = RoundedCornerShape(24.dp)
         ) {
-            Column(modifier = Modifier.padding(24.dp)) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Rounded.Bolt, null, tint = Color(0xFF00E676))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Charging Limit", color = Color.White, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.weight(1f))
+                    Text("$limit%", color = Color(0xFF00E676), fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                }
+                Slider(
+                    value = limit.toFloat(),
+                    onValueChange = { scope.launch { prefs.saveLimit(it.toInt()) } },
+                    valueRange = 50f..100f,
+                    colors = SliderDefaults.colors(thumbColor = Color(0xFF00E676), activeTrackColor = Color(0xFF00E676))
+                )
+                Text("Arus akan diputus otomatis saat baterai mencapai $limit%", color = Color.Gray, fontSize = 11.sp)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF121212)),
+            shape = RoundedCornerShape(24.dp)
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
                 Text("Manual Bypass", color = Color.White, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(12.dp))
                 Button(
                     onClick = {
                         scope.launch {
                             isBypassActive = true
-                            BatteryControl.setCharging(false)
+                            BatteryControl.setCharging(false) 
                             delay(5000)
                             BatteryControl.setCharging(true)
                             isBypassActive = false
-                            Toast.makeText(context, "Bypass RDX8 Selesai", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Bypass RDX8: Arus di-resume!", Toast.LENGTH_SHORT).show()
                         }
                     },
                     enabled = !isBypassActive,
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3))
                 ) {
-                    Text(if (isBypassActive) "PROCESSING..." else "RUN BYPASS (5s)")
+                    Text(if (isBypassActive) "BYPASSING (5s)..." else "AKTIFKAN BYPASS")
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // --- INFO CARD ---
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF121212)),
-            shape = RoundedCornerShape(32.dp)
-        ) {
-            Column(modifier = Modifier.padding(24.dp)) {
-                InfoRow("Manufacturer", android.os.Build.MANUFACTURER.uppercase())
-                InfoRow("Root Status", if(isRooted.value) "GRANTED" else "DENIED")
-            }
-        }
-    }
-}
-
-@Composable
-fun InfoRow(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(label, color = Color.Gray, fontSize = 14.sp)
-        Text(value, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
     }
 }

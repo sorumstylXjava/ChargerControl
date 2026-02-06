@@ -1,17 +1,17 @@
 {
   "allFiles": [
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/cpp/CMakeLists.txt",
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/utils/BatteryControl.kt",
       "selection": {
         "end": {
-          "column": 38,
-          "index": 38,
-          "line": 0
+          "column": 4,
+          "index": 252,
+          "line": 11
         },
         "start": {
-          "column": 38,
-          "index": 38,
-          "line": 0
+          "column": 4,
+          "index": 252,
+          "line": 11
         }
       }
     },
@@ -19,32 +19,32 @@
       "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/HomeScreen.kt",
       "selection": {
         "end": {
-          "column": 0,
-          "index": 5089,
-          "line": 127
+          "column": 92,
+          "index": 1260,
+          "line": 32
         },
         "start": {
-          "column": 0,
-          "index": 5089,
-          "line": 127
+          "column": 92,
+          "index": 1260,
+          "line": 32
         }
       }
     },
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/utils/BatteryControl.kt",
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/StatusScreen.kt",
       "selection": {
         "end": {
           "column": 0,
-          "index": 276,
-          "line": 12
+          "index": 1143,
+          "line": 30
         },
         "start": {
           "column": 0,
-          "index": 276,
-          "line": 12
+          "index": 1143,
+          "line": 30
         }
       }
     }
   ],
-  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/utils/BatteryControl.kt"
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/StatusScreen.kt"
 }
