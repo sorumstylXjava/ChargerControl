@@ -15,7 +15,7 @@ object BatteryControl {
     }
 
     fun getEngineVersion(): String {
-        return "C++ Native Engine v2.1-Stable"
+        return "Support my Project in telegram"
     }
 
     fun optimizeKernel(powerSave: Boolean): Int {
