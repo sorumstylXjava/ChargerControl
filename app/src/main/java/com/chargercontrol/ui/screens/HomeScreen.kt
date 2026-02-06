@@ -105,7 +105,7 @@ fun HomeScreen() {
             shape = RoundedCornerShape(24.dp)
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
-                Text("Bypass System", color = Color.White, fontWeight = FontWeight.Bold)
+                Text("Bypass Batery", color = Color.White, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(12.dp))
                 Button(
                     onClick = {
