@@ -72,21 +72,18 @@ fun SettingsScreen() {
             Column(Modifier.padding(16.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier.size(40.dp).background(Color(0xFFFF5252).copy(alpha = 0.1f), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(Icons.Rounded.Thermostat, null, tint = Color(0xFFFF5252))
-                        }
-                        Spacer(Modifier.width(16.dp))
-                        Column {
-                            Text("Thermal Cut-off", color = Color.White, fontWeight = FontWeight.Bold)
-                            Text("Hentikan pengisian saat suhu tinggi", color = Color.Gray, fontSize = 12.sp)
-                        }
+                    Box(
+                        modifier = Modifier.size(40.dp).background(Color(0xFFFF5252).copy(alpha = 0.1f), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(Icons.Rounded.Thermostat, null, tint = Color(0xFFFF5252))
+                    }
+                    Spacer(Modifier.width(16.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Thermal Cut-off", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text("Hentikan pengisian saat suhu tinggi", color = Color.Gray, fontSize = 12.sp)
                     }
                     Switch(
                         checked = thermalEnabled,
@@ -123,21 +120,18 @@ fun SettingsScreen() {
         ) {
             Row(
                 modifier = Modifier.padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier.size(40.dp).background(Color(0xFFFFA726).copy(alpha = 0.1f), CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(Icons.Rounded.Memory, null, tint = Color(0xFFFFA726))
-                    }
-                    Spacer(Modifier.width(16.dp))
-                    Column {
-                        Text("CPU Power Save", color = Color.White, fontWeight = FontWeight.Bold)
-                        Text("Optimasi penggunaan daya prosesor", color = Color.Gray, fontSize = 12.sp)
-                    }
+                Box(
+                    modifier = Modifier.size(40.dp).background(Color(0xFFFFA726).copy(alpha = 0.1f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.Rounded.Memory, null, tint = Color(0xFFFFA726))
+                }
+                Spacer(Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("CPU Power Save", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text("Optimasi penggunaan daya prosesor", color = Color.Gray, fontSize = 12.sp)
                 }
                 Switch(
                     checked = powerSaveEnabled,
@@ -145,7 +139,6 @@ fun SettingsScreen() {
                         scope.launch {
                             prefs.setPowerSave(it)
                             BatteryControl.optimizeKernel(it)
-                            Toast.makeText(context, if(it) "Mode hemat daya aktif" else "Mode seimbang aktif", Toast.LENGTH_SHORT).show()
                         }
                     },
                     colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFFFFA726))
@@ -163,8 +156,7 @@ fun SettingsScreen() {
             subtitle = "Mereset data statistik baterai sistem",
             iconColor = Color(0xFF29B6F6)
         ) {
-            val success = SystemTweaks.resetBatteryStats()
-            Toast.makeText(context, if(success) "Statistik berhasil direset" else "Gagal mereset data", Toast.LENGTH_SHORT).show()
+            SystemTweaks.resetBatteryStats()
         }
 
         Spacer(Modifier.height(8.dp))
@@ -176,7 +168,6 @@ fun SettingsScreen() {
             iconColor = Color(0xFFAB47BC)
         ) {
             BatteryControl.executeRoot("pkill -f com.chargercontrol")
-            Toast.makeText(context, "Layanan dimulai ulang", Toast.LENGTH_SHORT).show()
         }
 
         Spacer(Modifier.height(8.dp))
@@ -188,7 +179,6 @@ fun SettingsScreen() {
             iconColor = Color.White
         ) {
             BatteryControl.executeRoot("chmod 777 /sys/class/power_supply/battery/*")
-            Toast.makeText(context, "Izin berhasil diberikan", Toast.LENGTH_SHORT).show()
         }
 
         Spacer(Modifier.height(24.dp))
@@ -224,7 +214,7 @@ fun SettingsScreen() {
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text("Java_nih_deks", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-                    Text(BatteryControl.getEngineVersion(), color = Color(0xFF00E676), fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                    Text(BatteryControl.getEngineVersion(), color = Color(0xFF00E676), fontSize = 12.sp)
                     Text("Battery Control v2.1", color = Color.Gray, fontSize = 13.sp)
                     Spacer(modifier = Modifier.height(24.dp))
                     
