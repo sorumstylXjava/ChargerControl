@@ -29,17 +29,19 @@ fun HomeScreen() {
     var currentLevel by remember { mutableStateOf(0) }
     var bypassStatus by remember { mutableStateOf("NORMAL") }
 
-    LaunchedEffect(Unit) {
-        while(true) {
-            currentLevel = BatteryControl.getBatteryLevel(context)
-            if (isEnabled) {
+    LaunchedEffect(isEnabled, limit) {
+        if (isEnabled) {
+            while(true) {
+                currentLevel = BatteryControl.getBatteryLevel(context)
                 if (currentLevel >= limit) {
                     BatteryControl.setChargingLimit(false)
-                } else {
+                } else if (currentLevel < (limit - 1)) {
                     BatteryControl.setChargingLimit(true)
                 }
+                delay(10000)
             }
-            delay(5000)
+        } else {
+            BatteryControl.setChargingLimit(true)
         }
     }
 
@@ -56,16 +58,20 @@ fun HomeScreen() {
             ) {
                 Column {
                     Text("Service Status", color = Color.Gray, fontSize = 12.sp)
-                    Text(if (isEnabled) "ACTIVE" else "INACTIVE", color = if (isEnabled) Color(0xFF00E676) else Color.Red, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                    Text(if (isEnabled) "ACTIVE" else "INACTIVE", color = if (isEnabled) Color(0xFF00E676) else Color(0xFFFF5252), fontWeight = FontWeight.Bold, fontSize = 20.sp)
                 }
                 Switch(
                     checked = isEnabled,
                     onCheckedChange = { 
                         scope.launch { 
                             prefs.setEnabled(it)
-                            if (!it) BatteryControl.setChargingLimit(true)
+                            if (!it) {
+                                BatteryControl.setChargingLimit(true)
+                                bypassStatus = "NORMAL"
+                            }
                         } 
-                    }
+                    },
+                    colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFF00E676))
                 )
             }
         }
@@ -74,18 +80,33 @@ fun HomeScreen() {
 
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF121212)),
+            colors = CardDefaults.cardColors(
+                containerColor = if (isEnabled) Color(0xFF121212) else Color(0xFF121212).copy(alpha = 0.5f)
+            ),
             shape = RoundedCornerShape(24.dp)
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
-                Text("Charging Limit", color = Color.White, fontWeight = FontWeight.Bold)
+                Text(
+                    "Charging Limit", 
+                    color = if (isEnabled) Color.White else Color.Gray, 
+                    fontWeight = FontWeight.Bold
+                )
                 Slider(
                     value = limit.toFloat(),
                     onValueChange = { scope.launch { prefs.setLimit(it.toInt()) } },
+                    enabled = isEnabled,
                     valueRange = 50f..100f,
-                    steps = 10
+                    steps = 10,
+                    colors = SliderDefaults.colors(
+                        thumbColor = if (isEnabled) Color(0xFF00E676) else Color.DarkGray,
+                        activeTrackColor = if (isEnabled) Color(0xFF00E676) else Color.DarkGray
+                    )
                 )
-                Text("Arus otomatis terputus pada $limit%", color = Color.Gray, fontSize = 11.sp)
+                Text(
+                    if (isEnabled) "Arus otomatis terputus pada $limit%" else "Aktifkan service untuk mengatur limit", 
+                    color = Color.Gray, 
+                    fontSize = 11.sp
+                )
             }
         }
 
@@ -108,15 +129,22 @@ fun HomeScreen() {
                 ) {
                     Button(
                         onClick = {
-                            bypassStatus = "BYPASS ACTIVE"
-                            BatteryControl.setChargingLimit(false)
-                            Toast.makeText(context, "Bypass ON", Toast.LENGTH_SHORT).show()
+                            if (isEnabled) {
+                                bypassStatus = "BYPASS ACTIVE"
+                                BatteryControl.setChargingLimit(false)
+                                Toast.makeText(context, "Bypass ON", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "Aktifkan Service Dahulu", Toast.LENGTH_SHORT).show()
+                            }
                         },
-                        modifier = Modifier.weight(1f).height(50.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3))
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF2E7D32),
+                            contentColor = Color.White
+                        )
                     ) {
-                        Text("ON")
+                        Text("ON", fontWeight = FontWeight.Bold)
                     }
 
                     Button(
@@ -125,11 +153,14 @@ fun HomeScreen() {
                             BatteryControl.setChargingLimit(true)
                             Toast.makeText(context, "Bypass OFF", Toast.LENGTH_SHORT).show()
                         },
-                        modifier = Modifier.weight(1f).height(50.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE91E63))
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFC62828),
+                            contentColor = Color.White
+                        )
                     ) {
-                        Text("OFF")
+                        Text("OFF", fontWeight = FontWeight.Bold)
                     }
                 }
             }

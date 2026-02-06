@@ -1,47 +1,17 @@
 {
   "allFiles": [
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/data/prefs.kt",
-      "selection": {
-        "end": {
-          "column": 0,
-          "index": 1624,
-          "line": 29
-        },
-        "start": {
-          "column": 0,
-          "index": 1624,
-          "line": 29
-        }
-      }
-    },
-    {
-      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/SettingsScreen.kt",
-      "selection": {
-        "end": {
-          "column": 0,
-          "index": 12122,
-          "line": 275
-        },
-        "start": {
-          "column": 0,
-          "index": 12122,
-          "line": 275
-        }
-      }
-    },
-    {
       "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/HomeScreen.kt",
       "selection": {
         "end": {
           "column": 0,
-          "index": 5523,
-          "line": 138
+          "index": 7017,
+          "line": 169
         },
         "start": {
           "column": 0,
-          "index": 5523,
-          "line": 138
+          "index": 7017,
+          "line": 169
         }
       }
     }
