@@ -19,22 +19,13 @@ android {
         externalNativeBuild { cmake { cppFlags "" } }
     }
 
-    signingConfigs {
-        release {
-            storeFile file(project.property("android.injected.signing.store.file"))
-            storePassword project.property("android.injected.signing.store.password")
-            keyAlias project.property("android.injected.signing.key.alias")
-            keyPassword project.property("android.injected.signing.key.password")
-        }
-    }
-
     buildTypes {
         release {
-            minifyEnabled true 
-            shrinkResources false 
+            minifyEnabled true
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             
-            signingConfig signingConfigs.debug 
+            signingConfig signingConfigs.debug
         }
     }
     

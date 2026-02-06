@@ -1,32 +1,17 @@
 {
   "allFiles": [
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/res/values/colors.xml",
-      "selection": {
-        "end": {
-          "column": 48,
-          "index": 459,
-          "line": 10
-        },
-        "start": {
-          "column": 48,
-          "index": 459,
-          "line": 10
-        }
-      }
-    },
-    {
       "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/build.gradle",
       "selection": {
         "end": {
           "column": 0,
-          "index": 486,
-          "line": 20
+          "index": 1770,
+          "line": 61
         },
         "start": {
           "column": 0,
-          "index": 486,
-          "line": 20
+          "index": 1770,
+          "line": 61
         }
       }
     }
