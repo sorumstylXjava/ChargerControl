@@ -10,6 +10,19 @@ import java.io.FileReader
 
 object BatteryControl {
 
+    init {
+        try {
+            System.loadLibrary("native-lib")
+        } catch (e: Throwable) {
+        }
+    }
+
+    external fun executeRoot(command: String): Int
+
+    fun readNode(path: String): String {
+        return readFile(path)
+    }
+
     fun getBatteryLevel(context: Context): Int {
         val intent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
         return intent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
