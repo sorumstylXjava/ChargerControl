@@ -1,35 +1,20 @@
 {
   "allFiles": [
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/HomeScreen.kt",
       "selection": {
         "end": {
           "column": 0,
-          "index": 257,
-          "line": 5
+          "index": 8245,
+          "line": 187
         },
         "start": {
           "column": 0,
-          "index": 257,
-          "line": 5
-        }
-      }
-    },
-    {
-      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml",
-      "selection": {
-        "end": {
-          "column": 0,
-          "index": 257,
-          "line": 5
-        },
-        "start": {
-          "column": 0,
-          "index": 257,
-          "line": 5
+          "index": 8245,
+          "line": 187
         }
       }
     }
   ],
-  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml"
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/HomeScreen.kt"
 }

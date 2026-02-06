@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,27 +28,32 @@ fun HomeScreen() {
     val isEnabled by prefs.enabledFlow.collectAsState(initial = false)
     val limit by prefs.limitFlow.collectAsState(initial = 100)
     var currentLevel by remember { mutableStateOf(0) }
-    var bypassStatus by remember { mutableStateOf("NORMAL") }
-    var lastAppliedState by remember { mutableStateOf<Boolean?>(null) }
+    
+    var bypassStatus by rememberSaveable { mutableStateOf("NORMAL") }
+    var lastAppliedState by rememberSaveable { mutableStateOf<Boolean?>(null) }
     var isProcessing by remember { mutableStateOf(false) }
 
-    LaunchedEffect(isEnabled, limit) {
+    LaunchedEffect(isEnabled, limit, bypassStatus) {
         if (isEnabled) {
             while(true) {
                 if (!isProcessing) {
                     currentLevel = BatteryControl.getBatteryLevel(context)
                     
-                    val shouldEnableCharging = when {
-                        currentLevel >= limit -> false
-                        currentLevel <= (limit - 5) -> true
-                        else -> lastAppliedState ?: (currentLevel < limit)
+                    val shouldEnableCharging = if (bypassStatus == "BYPASS ACTIVE") {
+                        false
+                    } else {
+                        when {
+                            currentLevel >= limit -> false
+                            currentLevel <= (limit - 5) -> true
+                            else -> lastAppliedState ?: (currentLevel < limit)
+                        }
                     }
 
                     if (shouldEnableCharging != lastAppliedState) {
                         isProcessing = true
                         BatteryControl.setChargingLimit(shouldEnableCharging)
                         lastAppliedState = shouldEnableCharging
-                        delay(3000)
+                        delay(2000)
                         isProcessing = false
                     }
                 }
@@ -108,7 +114,7 @@ fun HomeScreen() {
                     )
                 )
                 Text(
-                    if (isEnabled) "Limit: $limit% (Isi ulang otomatis di ${limit - 5}%)" else "Service mati", 
+                    if (isEnabled) "Batas: $limit% (Mulai isi di ${limit - 5}%)" else "Service mati", 
                     color = Color.Gray, 
                     fontSize = 11.sp
                 )
@@ -135,12 +141,14 @@ fun HomeScreen() {
                                 scope.launch {
                                     isProcessing = true
                                     bypassStatus = "BYPASS ACTIVE"
-                                    lastAppliedState = false
                                     BatteryControl.setChargingLimit(false)
-                                    Toast.makeText(context, "Bypass ON", Toast.LENGTH_SHORT).show()
-                                    delay(3000)
+                                    lastAppliedState = false
+                                    Toast.makeText(context, "Bypass Aktif", Toast.LENGTH_SHORT).show()
+                                    delay(1000)
                                     isProcessing = false
                                 }
+                            } else if (!isEnabled) {
+                                Toast.makeText(context, "Aktifkan Service!", Toast.LENGTH_SHORT).show()
                             }
                         },
                         modifier = Modifier.weight(1f).height(50.dp),
@@ -157,10 +165,10 @@ fun HomeScreen() {
                                 scope.launch {
                                     isProcessing = true
                                     bypassStatus = "NORMAL"
-                                    lastAppliedState = true
                                     BatteryControl.setChargingLimit(true)
-                                    Toast.makeText(context, "Bypass OFF", Toast.LENGTH_SHORT).show()
-                                    delay(3000)
+                                    lastAppliedState = true
+                                    Toast.makeText(context, "Bypass Mati", Toast.LENGTH_SHORT).show()
+                                    delay(1000)
                                     isProcessing = false
                                 }
                             }
