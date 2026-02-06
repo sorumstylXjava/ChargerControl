@@ -1,6 +1,13 @@
 package com.chargercontrol
 
+import android.Manifest
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
@@ -17,6 +24,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.chargercontrol.service.ChargingService
 import com.chargercontrol.ui.screens.HomeScreen
 import com.chargercontrol.ui.screens.SettingsScreen
 import com.chargercontrol.ui.screens.StatusScreen
@@ -25,6 +33,9 @@ import com.chargercontrol.ui.theme.ChargerControlTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        initAppCore()
+
         setContent {
             ChargerControlTheme {
                 val navController = rememberNavController()
@@ -107,6 +118,45 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    private fun initAppCore() {
+        checkRoot()
+        requestPermissions()
+        startChargingService()
+    }
+
+    private fun checkRoot() {
+        Thread {
+            try {
+                Runtime.getRuntime().exec("su")
+            } catch (e: Exception) {}
+        }.start()
+    }
+
+    private fun requestPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 101)
+        }
+
+        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+        if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+            try {
+                val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                    data = Uri.parse("package:$packageName")
+                }
+                startActivity(intent)
+            } catch (e: Exception) {}
+        }
+    }
+
+    private fun startChargingService() {
+        val intent = Intent(this, ChargingService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
         }
     }
 }
