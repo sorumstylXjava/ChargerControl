@@ -34,19 +34,26 @@ fun HomeScreen() {
         Card(
             modifier = Modifier.fillMaxWidth().height(100.dp),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
-            shape = RoundedCornerShape(32.dp)
+            shape = RoundedCornerShape(24.dp)
         ) {
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                Text(
-                    "CHARGER CONTROL", 
-                    color = if(isEnabled) Color(0xFF00E676) else Color.Red, 
-                    fontWeight = FontWeight.ExtraBold, 
-                    fontSize = 20.sp
+            Row(
+                modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text("Charger Control", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+                    Text(if (isEnabled) "Service is Running" else "Service is Stopped", color = if (isEnabled) Color(0xFF00E676) else Color.Gray, fontSize = 12.sp)
+                }
+                Switch(
+                    checked = isEnabled,
+                    onCheckedChange = { scope.launch { prefs.setEnabled(it) } },
+                    colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFF00E676))
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -55,21 +62,25 @@ fun HomeScreen() {
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Rounded.Bolt, null, tint = Color(0xFF00E676))
+                    Icon(Icons.Rounded.BatteryChargingFull, null, tint = Color(0xFF00E676))
                     Spacer(Modifier.width(8.dp))
-                    Text("Charging Limit", color = Color.White, fontWeight = FontWeight.Bold)
-                    Spacer(Modifier.weight(1f))
-                    Text("$limit%", color = Color(0xFF00E676), fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                    Text("Limit Charging", color = Color.White, fontWeight = FontWeight.Bold)
                 }
+                
+                Spacer(Modifier.height(20.dp))
+                
                 Slider(
                     value = limit.toFloat(),
-                    onValueChange = { scope.launch { prefs.saveLimit(it.toInt()) } },
+                    onValueChange = { scope.launch { prefs.setLimit(it.toInt()) } },
                     valueRange = 50f..100f,
-                    colors = SliderDefaults.colors(
-                        thumbColor = Color(0xFF00E676), 
-                        activeTrackColor = Color(0xFF00E676)
-                    )
+                    colors = SliderDefaults.colors(thumbColor = Color(0xFF00E676), activeTrackColor = Color(0xFF00E676))
                 )
+                
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("50%", color = Color.Gray, fontSize = 12.sp)
+                    Text("${limit}%", color = Color(0xFF00E676), fontWeight = FontWeight.Bold)
+                    Text("100%", color = Color.Gray, fontSize = 12.sp)
+                }
                 Text("Arus otomatis terputus pada $limit%", color = Color.Gray, fontSize = 11.sp)
             }
         }
@@ -82,17 +93,17 @@ fun HomeScreen() {
             shape = RoundedCornerShape(24.dp)
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
-                Text("Bypass batery", color = Color.White, fontWeight = FontWeight.Bold)
+                Text("Bypass System", color = Color.White, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(12.dp))
                 Button(
                     onClick = {
                         scope.launch {
                             isBypassActive = true
-                            BatteryControl.setCharging(false) 
+                            BatteryControl.setBypass(true) 
                             delay(5000) 
-                            BatteryControl.setCharging(true) 
+                            BatteryControl.setBypass(false) 
                             isBypassActive = false
-                            Toast.makeText(context, "bypass selesai", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Bypass Selesai", Toast.LENGTH_SHORT).show()
                         }
                     },
                     enabled = !isBypassActive,
