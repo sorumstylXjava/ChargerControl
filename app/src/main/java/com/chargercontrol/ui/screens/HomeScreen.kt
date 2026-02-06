@@ -28,7 +28,7 @@ fun HomeScreen() {
     val limit by prefs.limitFlow.collectAsState(initial = 100)
     var currentLevel by remember { mutableStateOf(0) }
     var bypassStatus by remember { mutableStateOf("NORMAL") }
-    var lastState by remember { mutableStateOf<Boolean?>(null) }
+    var lastAppliedState by remember { mutableStateOf<Boolean?>(null) }
     var isProcessing by remember { mutableStateOf(false) }
 
     LaunchedEffect(isEnabled, limit) {
@@ -39,24 +39,24 @@ fun HomeScreen() {
                     
                     val shouldEnableCharging = when {
                         currentLevel >= limit -> false
-                        currentLevel <= (limit - 4) -> true
-                        else -> lastState ?: (currentLevel < limit)
+                        currentLevel <= (limit - 5) -> true
+                        else -> lastAppliedState ?: (currentLevel < limit)
                     }
 
-                    if (shouldEnableCharging != lastState) {
+                    if (shouldEnableCharging != lastAppliedState) {
                         isProcessing = true
                         BatteryControl.setChargingLimit(shouldEnableCharging)
-                        lastState = shouldEnableCharging
-                        delay(2000)
+                        lastAppliedState = shouldEnableCharging
+                        delay(3000)
                         isProcessing = false
                     }
                 }
-                delay(15000)
+                delay(10000)
             }
         } else {
-            if (lastState != true) {
+            if (lastAppliedState != true) {
                 BatteryControl.setChargingLimit(true)
-                lastState = true
+                lastAppliedState = true
                 bypassStatus = "NORMAL"
             }
         }
@@ -108,7 +108,7 @@ fun HomeScreen() {
                     )
                 )
                 Text(
-                    if (isEnabled) "Batas: $limit% (Mulai lagi di ${limit - 4}%)" else "Aktifkan service", 
+                    if (isEnabled) "Limit: $limit% (Isi ulang otomatis di ${limit - 5}%)" else "Service mati", 
                     color = Color.Gray, 
                     fontSize = 11.sp
                 )
@@ -123,7 +123,7 @@ fun HomeScreen() {
             shape = RoundedCornerShape(24.dp)
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
-                Text("Manual Bypass", color = Color.White, fontWeight = FontWeight.Bold)
+                Text("Bypass Mode", color = Color.White, fontWeight = FontWeight.Bold)
                 Text("Status: $bypassStatus", color = Color.Gray, fontSize = 12.sp)
                 
                 Spacer(Modifier.height(16.dp))
@@ -135,18 +135,21 @@ fun HomeScreen() {
                                 scope.launch {
                                     isProcessing = true
                                     bypassStatus = "BYPASS ACTIVE"
-                                    lastState = false
+                                    lastAppliedState = false
                                     BatteryControl.setChargingLimit(false)
                                     Toast.makeText(context, "Bypass ON", Toast.LENGTH_SHORT).show()
-                                    delay(2000)
+                                    delay(3000)
                                     isProcessing = false
                                 }
                             }
                         },
-                        modifier = Modifier.weight(1f).height(48.dp),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1B5E20))
-                    ) { Text("ON", fontWeight = FontWeight.Bold) }
+                        modifier = Modifier.weight(1f).height(50.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF2C2C2C),
+                            contentColor = Color(0xFF00E676)
+                        )
+                    ) { Text("ON", fontWeight = FontWeight.ExtraBold) }
 
                     Button(
                         onClick = {
@@ -154,18 +157,21 @@ fun HomeScreen() {
                                 scope.launch {
                                     isProcessing = true
                                     bypassStatus = "NORMAL"
-                                    lastState = true
+                                    lastAppliedState = true
                                     BatteryControl.setChargingLimit(true)
                                     Toast.makeText(context, "Bypass OFF", Toast.LENGTH_SHORT).show()
-                                    delay(2000)
+                                    delay(3000)
                                     isProcessing = false
                                 }
                             }
                         },
-                        modifier = Modifier.weight(1f).height(48.dp),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C))
-                    ) { Text("OFF", fontWeight = FontWeight.Bold) }
+                        modifier = Modifier.weight(1f).height(50.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF2C2C2C),
+                            contentColor = Color(0xFFFF5252)
+                        )
+                    ) { Text("OFF", fontWeight = FontWeight.ExtraBold) }
                 }
             }
         }

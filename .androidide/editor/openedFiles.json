@@ -5,16 +5,46 @@
       "selection": {
         "end": {
           "column": 0,
-          "index": 7540,
-          "line": 173
+          "index": 7840,
+          "line": 179
         },
         "start": {
           "column": 0,
-          "index": 7540,
-          "line": 173
+          "index": 7840,
+          "line": 179
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/res/values/colors.xml",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 0,
+          "line": 0
+        },
+        "start": {
+          "column": 0,
+          "index": 0,
+          "line": 0
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/AndroidManifest.xml",
+      "selection": {
+        "end": {
+          "column": 35,
+          "index": 1042,
+          "line": 17
+        },
+        "start": {
+          "column": 35,
+          "index": 1042,
+          "line": 17
         }
       }
     }
   ],
-  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/HomeScreen.kt"
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/AndroidManifest.xml"
 }
