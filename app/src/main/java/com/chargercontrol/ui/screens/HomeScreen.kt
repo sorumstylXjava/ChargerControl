@@ -34,18 +34,19 @@ fun HomeScreen() {
         Card(
             modifier = Modifier.fillMaxWidth().height(100.dp),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
-            shape = RoundedCornerShape(24.dp)
+            shape = RoundedCornerShape(32.dp)
         ) {
-            Row(Modifier.fillMaxSize().padding(20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                Column {
-                    Text("RDX8 ENGINE", color = if(isEnabled) Color(0xFF00E676) else Color.Red, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-                    Text("Status: ${if(isEnabled) "RUNNING" else "STOPPED"}", color = Color.Gray, fontSize = 12.sp)
-                }
-                Switch(checked = isEnabled, onCheckedChange = { scope.launch { prefs.saveEnabled(it) } })
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                Text(
+                    "CHARGER CONTROL", 
+                    color = if(isEnabled) Color(0xFF00E676) else Color.Red, 
+                    fontWeight = FontWeight.ExtraBold, 
+                    fontSize = 20.sp
+                )
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -64,9 +65,12 @@ fun HomeScreen() {
                     value = limit.toFloat(),
                     onValueChange = { scope.launch { prefs.saveLimit(it.toInt()) } },
                     valueRange = 50f..100f,
-                    colors = SliderDefaults.colors(thumbColor = Color(0xFF00E676), activeTrackColor = Color(0xFF00E676))
+                    colors = SliderDefaults.colors(
+                        thumbColor = Color(0xFF00E676), 
+                        activeTrackColor = Color(0xFF00E676)
+                    )
                 )
-                Text("Arus akan diputus otomatis saat baterai mencapai $limit%", color = Color.Gray, fontSize = 11.sp)
+                Text("Arus otomatis terputus pada $limit%", color = Color.Gray, fontSize = 11.sp)
             }
         }
 
@@ -78,17 +82,17 @@ fun HomeScreen() {
             shape = RoundedCornerShape(24.dp)
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
-                Text("Manual Bypass", color = Color.White, fontWeight = FontWeight.Bold)
+                Text("Bypass System", color = Color.White, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(12.dp))
                 Button(
                     onClick = {
                         scope.launch {
                             isBypassActive = true
                             BatteryControl.setCharging(false) 
-                            delay(5000)
-                            BatteryControl.setCharging(true)
+                            delay(5000) 
+                            BatteryControl.setCharging(true) 
                             isBypassActive = false
-                            Toast.makeText(context, "Bypass RDX8: Arus di-resume!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "bypass selesai", Toast.LENGTH_SHORT).show()
                         }
                     },
                     enabled = !isBypassActive,
@@ -96,7 +100,7 @@ fun HomeScreen() {
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3))
                 ) {
-                    Text(if (isBypassActive) "BYPASSING (5s)..." else "AKTIFKAN BYPASS")
+                    Text(if (isBypassActive) "BYPASSING..." else "AKTIFKAN BYPASS")
                 }
             }
         }

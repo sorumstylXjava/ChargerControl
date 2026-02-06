@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.chargercontrol.ui.components.*
 import com.chargercontrol.utils.BatteryControl
 import kotlinx.coroutines.delay
+import kotlin.math.abs
 
 @Composable
 fun StatusScreen() {
@@ -30,11 +31,12 @@ fun StatusScreen() {
     var level by remember { mutableStateOf(0) }
     var temp by remember { mutableStateOf(0f) }
     var volt by remember { mutableStateOf(0) }
-    var health by remember { mutableStateOf("Unknown") }
+    var health by remember { mutableStateOf("Good") }
     var tech by remember { mutableStateOf("Li-ion") }
-    var currentRaw by remember { mutableStateOf(0) }
+    var currentMA by remember { mutableStateOf(0) }
     var powerSource by remember { mutableStateOf("Battery") }
     var capacity by remember { mutableStateOf(0) }
+    var cycleCount by remember { mutableStateOf("N/A") }
     
     val currentHistory = remember { mutableStateListOf<Float>() }
 
@@ -51,28 +53,28 @@ fun StatusScreen() {
                 health = when(it.getIntExtra(BatteryManager.EXTRA_HEALTH, 0)) {
                     BatteryManager.BATTERY_HEALTH_GOOD -> "Good"
                     BatteryManager.BATTERY_HEALTH_OVERHEAT -> "Overheat"
+                    BatteryManager.BATTERY_HEALTH_COLD -> "Cold"
                     else -> "Normal"
                 }
 
                 val ps = it.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0)
-                powerSource = when(ps) {
-                    BatteryManager.BATTERY_PLUGGED_AC -> "AC Wall"
-                    BatteryManager.BATTERY_PLUGGED_USB -> "USB Port"
-                    else -> "Discharging"
-                }
+                powerSource = if (ps > 0) "Charging" else "Discharging"
                 
                 val bm = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
                 val now = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
-                currentRaw = now
+                
+                currentMA = now / 1000 
                 capacity = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER) / 1000
+                cycleCount = BatteryControl.getCycleCount()
 
-                val currentMA = BatteryControl.formatCurrent(now).toFloat()
-                currentHistory.add(currentMA)
-                if (currentHistory.size > 30) currentHistory.removeAt(0)
+                currentHistory.add(abs(currentMA).toFloat())
+                if (currentHistory.size > 20) currentHistory.removeAt(0)
             }
             delay(1000) 
         }
     }
+
+    val watts = (volt.toFloat() / 1000f) * (currentMA.toFloat() / 1000f)
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -88,7 +90,6 @@ fun StatusScreen() {
                 modifier = Modifier.padding(vertical = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                
                 LargeBatteryView(level) 
                 Spacer(Modifier.height(8.dp))
                 Text(
@@ -101,7 +102,6 @@ fun StatusScreen() {
         }
         
         item(span = { GridItemSpan(2) }) {
-            val watts = (volt.toFloat() / 1000f) * (BatteryControl.formatCurrent(currentRaw).toFloat() / 1000f)
             Card(
                 colors = CardDefaults.cardColors(containerColor = Color(0xFF121212)),
                 shape = RoundedCornerShape(24.dp)
@@ -112,8 +112,13 @@ fun StatusScreen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text("Charging Power", color = Color.Gray, fontSize = 12.sp)
-                        Text("${String.format("%.2f", watts)} Watt", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
+                        Text("Power Usage", color = Color.Gray, fontSize = 12.sp)
+                        Text(
+                            text = "${String.format("%.2f", watts)} Watt", 
+                            color = if (watts < 0) Color(0xFFFF5252) else Color(0xFF00E676), 
+                            fontSize = 24.sp, 
+                            fontWeight = FontWeight.ExtraBold
+                        )
                     }
                     Icon(Icons.Rounded.ElectricBolt, null, tint = Color.Yellow, modifier = Modifier.size(40.dp))
                 }
@@ -121,13 +126,13 @@ fun StatusScreen() {
         }
 
         item { StatusCard(Icons.Rounded.Thermostat, "Suhu", "$temp", "°C", Color.Yellow) }
-        item { StatusCard(Icons.Rounded.Bolt, "Arus", "${BatteryControl.formatCurrent(currentRaw)}", "mA", Color.Cyan) }
+        item { StatusCard(Icons.Rounded.Bolt, "Arus", "$currentMA", "mA", Color.Cyan) }
         item { StatusCard(Icons.Rounded.FlashOn, "Voltase", "$volt", "mV", Color.Green) }
         item { StatusCard(Icons.Rounded.Favorite, "Kesehatan", health, "", Color(0xFFFF4081)) }
         item { StatusCard(Icons.Rounded.Memory, "Teknologi", tech, "", Color.Magenta) }
         item { StatusCard(Icons.Rounded.Power, "Sumber", powerSource, "", Color.White) }
         item { StatusCard(Icons.Rounded.Straighten, "Kapasitas", "$capacity", "mAh", Color(0xFFFFA500)) }
-        item { StatusCard(Icons.Rounded.History, "Cycle", "N/A", "", Color.LightGray) }
+        item { StatusCard(Icons.Rounded.History, "Cycle Count", cycleCount, "", Color.LightGray) }
         
         item(span = { GridItemSpan(2) }) {
             Card(
@@ -138,7 +143,7 @@ fun StatusScreen() {
                 Column(Modifier.padding(20.dp)) {
                     Text("Live Current (mA)", color = Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.height(16.dp))
-                    RealTimeGraph(currentHistory.toList()) 
+                    RealTimeGraph(currentHistory.toList().map { it.toInt() }) 
                 }
             }
         }
