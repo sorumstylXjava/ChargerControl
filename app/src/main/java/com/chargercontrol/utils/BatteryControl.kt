@@ -14,9 +14,6 @@ object BatteryControl {
         } catch (e: Throwable) {}
     }
 
-    private var cachedControlPath: String? = null
-    private var isInvertedLogic = false
-
     external fun executeRoot(command: String): Int
 
     private fun readNodeRoot(path: String): String {
@@ -92,8 +89,7 @@ object BatteryControl {
         val paths = listOf(
             "/sys/class/power_supply/battery/charge_full_design",
             "/sys/class/power_supply/bms/charge_full_design",
-            "/sys/class/power_supply/battery/capacity_design_uah",
-            "/sys/class/power_supply/main/charge_full_design"
+            "/sys/class/power_supply/battery/capacity_design_uah"
         )
         for (path in paths) {
             val raw = readNodeRoot(path)
@@ -103,31 +99,18 @@ object BatteryControl {
                 return "$mah mAh"
             }
         }
-        
-        return try {
-            val powerProfileClass = "com.android.internal.os.PowerProfile"
-            val mPowerProfile = Class.forName(powerProfileClass)
-                .getConstructor(Context::class.java)
-                .newInstance(context)
-            val capacity = Class.forName(powerProfileClass)
-                .getMethod("getBatteryCapacity")
-                .invoke(mPowerProfile) as Double
-            "${capacity.toInt()} mAh"
-        } catch (e: Exception) {
-            "N/A"
-        }
+        return "N/A"
     }
 
     fun getCycleCount(): String {
         val paths = listOf(
             "/sys/class/power_supply/battery/cycle_count",
             "/sys/class/power_supply/bms/cycle_count",
-            "/sys/class/power_supply/battery/batt_cycle",
             "/sys/class/power_supply/main/cycle_count"
         )
         for (path in paths) {
             val raw = readNodeRoot(path)
-            if (raw.isNotEmpty()) return raw
+            if (raw.isNotEmpty() && raw != "0") return raw
         }
         return "N/A"
     }
@@ -138,46 +121,26 @@ object BatteryControl {
             BatteryManager.BATTERY_HEALTH_GOOD -> "Good"
             BatteryManager.BATTERY_HEALTH_OVERHEAT -> "Overheat"
             BatteryManager.BATTERY_HEALTH_DEAD -> "Dead"
-            BatteryManager.BATTERY_HEALTH_OVER_VOLTAGE -> "Over Voltage"
-            BatteryManager.BATTERY_HEALTH_COLD -> "Cold"
             else -> "Good"
         }
     }
 
-    private fun findControlPath() {
-        if (cachedControlPath != null) return
-
-        val potentialPaths = listOf(
-            "/sys/class/power_supply/battery/charging_enabled",
-            "/sys/class/power_supply/main/charging_enabled",
-            "/sys/class/power_supply/battery/batt_slate_mode",
-            "/sys/class/power_supply/battery/battery_charging_enabled",
-            "/sys/class/power_supply/charger/charge_disable",
-            "/sys/class/power_supply/battery/input_suspend",
-            "/sys/module/qpnp_smb5/parameters/force_hvdcp_disable",
-            "/sys/class/power_supply/pm8916-bms/battery_charging_enabled"
+    fun setChargingLimit(enable: Boolean) {
+        val value = if (enable) "1" else "0"
+        val invValue = if (enable) "0" else "1"
+        
+        val commands = listOf(
+            "echo $value > /sys/class/power_supply/battery/charging_enabled",
+            "echo $value > /sys/class/power_supply/main/charging_enabled",
+            "echo $value > /sys/class/power_supply/battery/battery_charging_enabled",
+            "echo $invValue > /sys/class/power_supply/battery/input_suspend",
+            "echo $invValue > /sys/class/power_supply/charger/charge_disable",
+            "echo $invValue > /sys/module/qpnp_smb5/parameters/force_hvdcp_disable"
         )
 
-        for (path in potentialPaths) {
-            if (File(path).exists()) {
-                cachedControlPath = path
-                isInvertedLogic = path.contains("disable") || path.contains("suspend")
-                return
-            }
+        commands.forEach { cmd ->
+            executeRoot("su -c '$cmd'")
         }
-    }
-
-    fun setChargingLimit(enable: Boolean) {
-        findControlPath()
-        val path = cachedControlPath ?: return
-        
-        val value = if (isInvertedLogic) {
-            if (enable) "0" else "1"
-        } else {
-            if (enable) "1" else "0"
-        }
-
-        Runtime.getRuntime().exec(arrayOf("su", "-c", "chmod 666 $path && echo $value > $path"))
     }
 
     fun setBypassLogic(onComplete: () -> Unit) {

@@ -4,14 +4,14 @@
       "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/utils/BatteryControl.kt",
       "selection": {
         "end": {
-          "column": 0,
-          "index": 6807,
-          "line": 193
+          "column": 35,
+          "index": 130,
+          "line": 4
         },
         "start": {
-          "column": 0,
-          "index": 6807,
-          "line": 193
+          "column": 35,
+          "index": 130,
+          "line": 4
         }
       }
     },
@@ -35,16 +35,16 @@
       "selection": {
         "end": {
           "column": 0,
-          "index": 4807,
-          "line": 120
+          "index": 4809,
+          "line": 122
         },
         "start": {
           "column": 0,
-          "index": 4807,
-          "line": 120
+          "index": 4809,
+          "line": 122
         }
       }
     }
   ],
-  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/utils/BatteryControl.kt"
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/HomeScreen.kt"
 }

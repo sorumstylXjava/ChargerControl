@@ -32,10 +32,12 @@ fun HomeScreen() {
     LaunchedEffect(Unit) {
         while(true) {
             currentLevel = BatteryControl.getBatteryLevel(context)
-            if (isEnabled && currentLevel >= limit) {
-                BatteryControl.setChargingLimit(false)
-            } else if (isEnabled && currentLevel < limit) {
-                BatteryControl.setChargingLimit(true)
+            if (isEnabled) {
+                if (currentLevel >= limit) {
+                    BatteryControl.setChargingLimit(false)
+                } else {
+                    BatteryControl.setChargingLimit(true)
+                }
             }
             delay(5000)
         }
@@ -61,7 +63,7 @@ fun HomeScreen() {
                     onCheckedChange = { 
                         scope.launch { 
                             prefs.setEnabled(it)
-                            BatteryControl.setChargingLimit(it)
+                            if (!it) BatteryControl.setChargingLimit(true)
                         } 
                     }
                 )
@@ -103,7 +105,7 @@ fun HomeScreen() {
                         BatteryControl.setBypassLogic {
                             isBypassActive = false
                             scope.launch {
-                                Toast.makeText(context, "Bypass Cycle Completed", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Bypass Selesai", Toast.LENGTH_SHORT).show()
                             }
                         }
                     },
@@ -112,7 +114,7 @@ fun HomeScreen() {
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3))
                 ) {
-                    Text(if (isBypassActive) "CALIBRATING (5s)..." else "RE-CALIBRATE BATTERY")
+                    Text(if (isBypassActive) "BYPASSING..." else "AKTIFKAN BYPASS")
                 }
             }
         }
