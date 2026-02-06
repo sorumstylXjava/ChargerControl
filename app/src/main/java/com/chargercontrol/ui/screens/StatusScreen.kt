@@ -1,5 +1,6 @@
 package com.chargercontrol.ui.screens
 
+import android.content.Context // Ditambahkan untuk memperbaiki error Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
@@ -65,26 +66,26 @@ fun StatusScreen() {
                 capacity = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER) / 1000
             }
 
-            val rawCurrentUA = withContext(Dispatchers.IO) {
+            val rawCurrent = withContext(Dispatchers.IO) {
                 val paths = listOf(
                     "/sys/class/power_supply/battery/current_now",
                     "/sys/class/power_supply/bms/current_now",
                     "/sys/class/power_supply/main/current_now"
                 )
-                var current = 0
+                var result = 0
                 for (path in paths) {
                     try {
                         val value = BatteryControl.readNode(path).trim().toIntOrNull()
                         if (value != null && value != 0) {
-                            current = value
+                            result = value
                             break
                         }
-                    } catch (e: Throwable) { }
+                    } catch (e: Exception) { }
                 }
-                current
+                result
             }
             
-            currentMA = rawCurrentUA / 1000
+            currentMA = if (abs(rawCurrent) > 10000) rawCurrent / 1000 else rawCurrent
             
             cycleCount = withContext(Dispatchers.IO) {
                 try { BatteryControl.getCycleCount() } catch (e: Throwable) { "N/A" }
