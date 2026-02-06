@@ -37,11 +37,12 @@ fun SettingsScreen() {
     val scope = rememberCoroutineScope()
     val prefs = remember { Prefs(context) }
     
-    var maxTemp by remember { mutableStateOf(40f) } 
-    var autoCutoff by remember { mutableStateOf(false) }
+    val thermalEnabled by prefs.thermalFlow.collectAsState(initial = false)
+    val maxTemp by prefs.maxTempFlow.collectAsState(initial = 40f)
+    val powerSaveEnabled by prefs.powerSaveFlow.collectAsState(initial = false)
+    
     var showInfo by remember { mutableStateOf(false) }
     var isAmoledMode by remember { mutableStateOf(true) }
-    var powerSaveEnabled by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -61,7 +62,7 @@ fun SettingsScreen() {
             }
         }
 
-        Text("PROTEKSI & KEAMANAN", color = Color(0xFF00E676), fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp, start = 4.dp))
+        Text("PROTEKSI", color = Color(0xFF00E676), fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp, start = 4.dp))
         
         Card(
             colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
@@ -84,17 +85,17 @@ fun SettingsScreen() {
                         Spacer(Modifier.width(16.dp))
                         Column {
                             Text("Thermal Cut-off", color = Color.White, fontWeight = FontWeight.Bold)
-                            Text("Stop charge jika overheat", color = Color.Gray, fontSize = 12.sp)
+                            Text("Hentikan pengisian saat suhu tinggi", color = Color.Gray, fontSize = 12.sp)
                         }
                     }
                     Switch(
-                        checked = autoCutoff,
-                        onCheckedChange = { autoCutoff = it },
+                        checked = thermalEnabled,
+                        onCheckedChange = { scope.launch { prefs.setThermal(it) } },
                         colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFF00E676))
                     )
                 }
                 
-                if (autoCutoff) {
+                if (thermalEnabled) {
                     Spacer(Modifier.height(16.dp))
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text("Batas Suhu", color = Color.Gray, fontSize = 12.sp)
@@ -102,7 +103,7 @@ fun SettingsScreen() {
                     }
                     Slider(
                         value = maxTemp,
-                        onValueChange = { maxTemp = it },
+                        onValueChange = { scope.launch { prefs.setMaxTemp(it) } },
                         valueRange = 35f..50f,
                         steps = 14,
                         colors = SliderDefaults.colors(thumbColor = Color(0xFFFF5252), activeTrackColor = Color(0xFFFF5252))
@@ -113,7 +114,7 @@ fun SettingsScreen() {
 
         Spacer(Modifier.height(24.dp))
 
-        Text("HARDWARE OPTIMIZER (C++)", color = Color(0xFFFFA726), fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp, start = 4.dp))
+        Text("HARDWARE", color = Color(0xFFFFA726), fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp, start = 4.dp))
         
         Card(
             colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
@@ -135,15 +136,17 @@ fun SettingsScreen() {
                     Spacer(Modifier.width(16.dp))
                     Column {
                         Text("CPU Power Save", color = Color.White, fontWeight = FontWeight.Bold)
-                        Text("Tweak governor via JNI", color = Color.Gray, fontSize = 12.sp)
+                        Text("Optimasi penggunaan daya prosesor", color = Color.Gray, fontSize = 12.sp)
                     }
                 }
                 Switch(
                     checked = powerSaveEnabled,
                     onCheckedChange = { 
-                        powerSaveEnabled = it
-                        BatteryControl.optimizeKernel(it)
-                        Toast.makeText(context, if(it) "Governor: Powersave" else "Governor: Balanced", Toast.LENGTH_SHORT).show()
+                        scope.launch {
+                            prefs.setPowerSave(it)
+                            BatteryControl.optimizeKernel(it)
+                            Toast.makeText(context, if(it) "Mode hemat daya aktif" else "Mode seimbang aktif", Toast.LENGTH_SHORT).show()
+                        }
                     },
                     colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFFFFA726))
                 )
@@ -152,16 +155,16 @@ fun SettingsScreen() {
 
         Spacer(Modifier.height(24.dp))
 
-        Text("ROOT & SYSTEM (JAVA)", color = Color(0xFF29B6F6), fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp, start = 4.dp))
+        Text("SISTEM", color = Color(0xFF29B6F6), fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp, start = 4.dp))
 
         SettingsTile(
             icon = Icons.Rounded.History,
-            title = "Wipe Battery Stats",
-            subtitle = "Java Stream reset (Perlu Reboot)",
+            title = "Kalibrasi Baterai",
+            subtitle = "Mereset data statistik baterai sistem",
             iconColor = Color(0xFF29B6F6)
         ) {
             val success = SystemTweaks.resetBatteryStats()
-            Toast.makeText(context, if(success) "Stats wiped via Java Engine" else "Failed to wipe", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, if(success) "Statistik berhasil direset" else "Gagal mereset data", Toast.LENGTH_SHORT).show()
         }
 
         Spacer(Modifier.height(8.dp))
@@ -169,23 +172,23 @@ fun SettingsScreen() {
         SettingsTile(
             icon = Icons.Rounded.Refresh,
             title = "Restart Daemon",
-            subtitle = "Muat ulang service charging",
+            subtitle = "Memuat ulang layanan kontrol",
             iconColor = Color(0xFFAB47BC)
         ) {
             BatteryControl.executeRoot("pkill -f com.chargercontrol")
-            Toast.makeText(context, "Service daemon restarted", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Layanan dimulai ulang", Toast.LENGTH_SHORT).show()
         }
 
         Spacer(Modifier.height(8.dp))
 
         SettingsTile(
             icon = Icons.Rounded.Terminal,
-            title = "Shell Access",
-            subtitle = "Paksa izin tulis sysfs (chmod 777)",
+            title = "Akses Izin",
+            subtitle = "Memberikan izin tulis ke node sistem",
             iconColor = Color.White
         ) {
             BatteryControl.executeRoot("chmod 777 /sys/class/power_supply/battery/*")
-            Toast.makeText(context, "Permissions granted", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Izin berhasil diberikan", Toast.LENGTH_SHORT).show()
         }
 
         Spacer(Modifier.height(24.dp))
@@ -194,8 +197,8 @@ fun SettingsScreen() {
 
         SettingsTile(
             icon = Icons.Rounded.Info,
-            title = "Developer Info",
-            subtitle = "Dibuat oleh Java_nih_deks",
+            title = "Tentang Aplikasi",
+            subtitle = "Informasi versi dan pengembang",
             iconColor = Color.White
         ) {
             showInfo = true
@@ -222,7 +225,7 @@ fun SettingsScreen() {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text("Java_nih_deks", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
                     Text(BatteryControl.getEngineVersion(), color = Color(0xFF00E676), fontSize = 12.sp, fontWeight = FontWeight.Medium)
-                    Text("Battery Control v2.1 (Ultimate)", color = Color.Gray, fontSize = 13.sp)
+                    Text("Battery Control v2.1", color = Color.Gray, fontSize = 13.sp)
                     Spacer(modifier = Modifier.height(24.dp))
                     
                     Button(

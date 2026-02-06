@@ -26,8 +26,8 @@ fun HomeScreen() {
     
     val isEnabled by prefs.enabledFlow.collectAsState(initial = false)
     val limit by prefs.limitFlow.collectAsState(initial = 80)
-    var isBypassActive by remember { mutableStateOf(false) }
     var currentLevel by remember { mutableStateOf(0) }
+    var bypassStatus by remember { mutableStateOf("NORMAL") }
 
     LaunchedEffect(Unit) {
         while(true) {
@@ -97,24 +97,40 @@ fun HomeScreen() {
             shape = RoundedCornerShape(24.dp)
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
-                Text("Bypass Batery", color = Color.White, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(12.dp))
-                Button(
-                    onClick = {
-                        isBypassActive = true
-                        BatteryControl.setBypassLogic {
-                            isBypassActive = false
-                            scope.launch {
-                                Toast.makeText(context, "Bypass Selesai", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    },
-                    enabled = !isBypassActive,
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3))
+                Text("Manual Bypass", color = Color.White, fontWeight = FontWeight.Bold)
+                Text("Status: $bypassStatus", color = Color.Gray, fontSize = 12.sp)
+                
+                Spacer(Modifier.height(16.dp))
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(if (isBypassActive) "BYPASSING..." else "AKTIFKAN BYPASS")
+                    Button(
+                        onClick = {
+                            bypassStatus = "BYPASS ACTIVE"
+                            BatteryControl.setChargingLimit(false)
+                            Toast.makeText(context, "Bypass ON", Toast.LENGTH_SHORT).show()
+                        },
+                        modifier = Modifier.weight(1f).height(50.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3))
+                    ) {
+                        Text("ON")
+                    }
+
+                    Button(
+                        onClick = {
+                            bypassStatus = "NORMAL"
+                            BatteryControl.setChargingLimit(true)
+                            Toast.makeText(context, "Bypass OFF", Toast.LENGTH_SHORT).show()
+                        },
+                        modifier = Modifier.weight(1f).height(50.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE91E63))
+                    ) {
+                        Text("OFF")
+                    }
                 }
             }
         }
