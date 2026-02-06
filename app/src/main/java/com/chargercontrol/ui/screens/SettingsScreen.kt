@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import com.chargercontrol.R
 import com.chargercontrol.data.Prefs
 import com.chargercontrol.utils.BatteryControl
+import com.chargercontrol.utils.SystemTweaks
 import kotlinx.coroutines.launch
 
 @Composable
@@ -40,6 +41,7 @@ fun SettingsScreen() {
     var autoCutoff by remember { mutableStateOf(false) }
     var showInfo by remember { mutableStateOf(false) }
     var isAmoledMode by remember { mutableStateOf(true) }
+    var powerSaveEnabled by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -111,16 +113,55 @@ fun SettingsScreen() {
 
         Spacer(Modifier.height(24.dp))
 
-        Text("ROOT & SYSTEM", color = Color(0xFF29B6F6), fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp, start = 4.dp))
+        Text("HARDWARE OPTIMIZER (C++)", color = Color(0xFFFFA726), fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp, start = 4.dp))
+        
+        Card(
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
+            shape = RoundedCornerShape(20.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier.size(40.dp).background(Color(0xFFFFA726).copy(alpha = 0.1f), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(Icons.Rounded.Memory, null, tint = Color(0xFFFFA726))
+                    }
+                    Spacer(Modifier.width(16.dp))
+                    Column {
+                        Text("CPU Power Save", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text("Tweak governor via JNI", color = Color.Gray, fontSize = 12.sp)
+                    }
+                }
+                Switch(
+                    checked = powerSaveEnabled,
+                    onCheckedChange = { 
+                        powerSaveEnabled = it
+                        BatteryControl.optimizeKernel(it)
+                        Toast.makeText(context, if(it) "Governor: Powersave" else "Governor: Balanced", Toast.LENGTH_SHORT).show()
+                    },
+                    colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFFFFA726))
+                )
+            }
+        }
+
+        Spacer(Modifier.height(24.dp))
+
+        Text("ROOT & SYSTEM (JAVA)", color = Color(0xFF29B6F6), fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp, start = 4.dp))
 
         SettingsTile(
-            icon = Icons.Rounded.Build,
-            title = "Kalibrasi Baterai",
-            subtitle = "Hapus batterystats.bin (Perlu Reboot)",
-            iconColor = Color(0xFFFFA726)
+            icon = Icons.Rounded.History,
+            title = "Wipe Battery Stats",
+            subtitle = "Java Stream reset (Perlu Reboot)",
+            iconColor = Color(0xFF29B6F6)
         ) {
-            BatteryControl.executeRoot("rm -f /data/system/batterystats.bin")
-            Toast.makeText(context, "Stats file deleted. Reboot now.", Toast.LENGTH_LONG).show()
+            val success = SystemTweaks.resetBatteryStats()
+            Toast.makeText(context, if(success) "Stats wiped via Java Engine" else "Failed to wipe", Toast.LENGTH_SHORT).show()
         }
 
         Spacer(Modifier.height(8.dp))
@@ -180,7 +221,8 @@ fun SettingsScreen() {
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text("Java_nih_deks", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-                    Text("Battery Control v2.0 (Ultimate)", color = Color.Gray, fontSize = 14.sp)
+                    Text(BatteryControl.getEngineVersion(), color = Color(0xFF00E676), fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                    Text("Battery Control v2.1 (Ultimate)", color = Color.Gray, fontSize = 13.sp)
                     Spacer(modifier = Modifier.height(24.dp))
                     
                     Button(

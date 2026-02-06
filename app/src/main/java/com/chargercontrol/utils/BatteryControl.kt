@@ -15,6 +15,8 @@ object BatteryControl {
     }
 
     external fun executeRoot(command: String): Int
+    external fun getEngineVersion(): String
+    external fun optimizeKernel(powerSave: Boolean): Int
 
     private fun readNodeRoot(path: String): String {
         return try {
@@ -77,9 +79,16 @@ object BatteryControl {
     }
 
     fun getBatteryTechnology(context: Context): String {
-        val sysPath = "/sys/class/power_supply/battery/technology"
-        val sysTech = readNodeRoot(sysPath)
-        if (sysTech.isNotEmpty()) return sysTech
+        val paths = listOf(
+            "/sys/class/power_supply/battery/technology",
+            "/sys/class/power_supply/battery/type",
+            "/sys/class/power_supply/bms/battery_type"
+        )
+        
+        for (path in paths) {
+            val raw = readNodeRoot(path)
+            if (raw.isNotEmpty()) return raw
+        }
 
         val intent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
         return intent?.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY) ?: "Li-ion"

@@ -1,0 +1,80 @@
+{
+  "allFiles": [
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/service/ChargingService.kt",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 2454,
+          "line": 78
+        },
+        "start": {
+          "column": 0,
+          "index": 2454,
+          "line": 78
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/cpp/native-lib.cpp",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 980,
+          "line": 25
+        },
+        "start": {
+          "column": 0,
+          "index": 980,
+          "line": 25
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/utils/SystemTweaks.java",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 545,
+          "line": 19
+        },
+        "start": {
+          "column": 0,
+          "index": 545,
+          "line": 19
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/SettingsScreen.kt",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 11946,
+          "line": 272
+        },
+        "start": {
+          "column": 0,
+          "index": 11946,
+          "line": 272
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/utils/BatteryControl.kt",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 5729,
+          "line": 165
+        },
+        "start": {
+          "column": 0,
+          "index": 5729,
+          "line": 165
+        }
+      }
+    }
+  ],
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/utils/BatteryControl.kt"
+}
