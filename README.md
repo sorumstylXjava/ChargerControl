@@ -14,11 +14,10 @@
 ---
 
 ## 🛠️ Technical Details
-
-* **[span_0](start_span)Language**: Approximately 96% Kotlin for smooth and modern UI performance[span_0](end_span).
-* **Architecture**: Utilizes a declarative design pattern with efficient State Management.
-* **[span_1](start_span)[span_2](start_span)Native Build**: Integrated with C++ using CMake for low-level system interactions[span_1](end_span)[span_2](end_span).
-* **[span_3](start_span)Compatibility**: Target SDK 34 (Android 14) with a minimum requirement of SDK 24[span_3](end_span).
+**Language**: Approximately 96% Kotlin for smooth and modern UI performance
+**Architecture**: Utilizes a declarative design pattern with efficient State Management.
+**Native Build**: Integrated with C++ using CMake for low-level system interactions
+**Compatibility**: Target SDK 34 (Android 14) with a minimum requirement of SDK 24
 
 ---
 
