@@ -1,6 +1,6 @@
 package com.chargercontrol.ui.screens
 
-import android.content.Context 
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
@@ -35,79 +35,47 @@ fun StatusScreen() {
     var volt by remember { mutableStateOf(0) }
     var health by remember { mutableStateOf("Good") }
     var tech by remember { mutableStateOf("Li-ion") }
-    var currentMA by remember { mutableStateOf(0) }
+    var currentMA by remember { mutableStateOf(0f) }
     var powerSource by remember { mutableStateOf("Battery") }
-    var capacity by remember { mutableStateOf(0) }
+    var capacity by remember { mutableStateOf("0") }
     var cycleCount by remember { mutableStateOf("N/A") }
+    var watts by remember { mutableStateOf(0f) }
     
     val currentHistory = remember { mutableStateListOf<Float>() }
 
     LaunchedEffect(Unit) {
-        val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
         while(true) {
-            val intent = context.registerReceiver(null, filter)
+            val intent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
             intent?.let {
                 level = it.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
                 temp = it.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) / 10f
                 volt = it.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0)
                 tech = it.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY) ?: "Li-ion"
+                health = BatteryControl.getBatteryHealth(context)
                 
-                health = when(it.getIntExtra(BatteryManager.EXTRA_HEALTH, 0)) {
-                    BatteryManager.BATTERY_HEALTH_GOOD -> "Good"
-                    BatteryManager.BATTERY_HEALTH_OVERHEAT -> "Overheat"
-                    BatteryManager.BATTERY_HEALTH_COLD -> "Cold"
-                    else -> "Normal"
-                }
-
                 val ps = it.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0)
                 powerSource = if (ps > 0) "Charging" else "Discharging"
-                
-                val bm = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
-                capacity = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER) / 1000
             }
 
-            val rawCurrent = withContext(Dispatchers.IO) {
-                val paths = listOf(
-                    "/sys/class/power_supply/battery/current_now",
-                    "/sys/class/power_supply/bms/current_now",
-                    "/sys/class/power_supply/main/current_now"
-                )
-                var foundCurrent = 0
-                for (path in paths) {
-                    try {
-                        
-                        val value = BatteryControl.readNode(path).trim().toIntOrNull()
-                        if (value != null && value != 0) {
-                            foundCurrent = value
-                            break
-                        }
-                    } catch (e: Throwable) { }
-                }
-                foundCurrent
-            }
-            
-            currentMA = if (abs(rawCurrent) > 10000) rawCurrent / 1000 else rawCurrent
-            
-            cycleCount = withContext(Dispatchers.IO) {
-                try { BatteryControl.getCycleCount() } catch (e: Throwable) { "N/A" }
+            withContext(Dispatchers.IO) {
+                currentMA = BatteryControl.getFormattedCurrent(context)
+                watts = BatteryControl.getWattage(context)
+                capacity = BatteryControl.getDesignedCapacity(context)
+                cycleCount = BatteryControl.getCycleCount()
             }
 
-            currentHistory.add(currentMA.toFloat())
+            currentHistory.add(currentMA)
             if (currentHistory.size > 50) currentHistory.removeAt(0)
 
             delay(1000) 
         }
     }
 
-    val watts = abs((volt.toFloat() / 1000f) * (currentMA.toFloat() / 1000f))
     val isCharging = currentMA > 0
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-            .padding(horizontal = 16.dp),
+        modifier = Modifier.fillMaxSize().background(Color.Black).padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -152,17 +120,17 @@ fun StatusScreen() {
         }
 
         item { StatusCard(Icons.Rounded.Thermostat, "Suhu", "$temp", "°C", Color.Yellow) }
-        item { StatusCard(Icons.Rounded.Bolt, "Arus", "$currentMA", "mA", Color.Cyan) }
+        item { StatusCard(Icons.Rounded.Bolt, "Arus", "${currentMA.toInt()}", "mA", Color.Cyan) }
         item { StatusCard(Icons.Rounded.FlashOn, "Voltase", "$volt", "mV", Color.Green) }
         item { StatusCard(Icons.Rounded.Favorite, "Kesehatan", health, "", Color(0xFFFF4081)) }
         item { StatusCard(Icons.Rounded.Memory, "Teknologi", tech, "", Color.Magenta) }
         item { StatusCard(Icons.Rounded.Power, "Sumber", powerSource, "", Color.White) }
-        item { StatusCard(Icons.Rounded.Straighten, "Kapasitas", "$capacity", "mAh", Color(0xFFFFA500)) }
+        item { StatusCard(Icons.Rounded.Straighten, "Kapasitas", capacity, "", Color(0xFFFFA500)) }
         item { StatusCard(Icons.Rounded.History, "Cycle Count", cycleCount, "", Color.LightGray) }
         
         item(span = { GridItemSpan(2) }) {
             RealTimeGraph(currentHistory.toList())
         }
-        item(span = { GridItemSpan(2) }) { Spacer(Modifier.height(80.dp)) }
+        item(span = { GridItemSpan(2) }) { Spacer(Modifier.height(100.dp)) }
     }
 }
