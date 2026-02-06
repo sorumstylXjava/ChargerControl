@@ -19,19 +19,36 @@ android {
         externalNativeBuild { cmake { cppFlags "" } }
     }
 
-    buildTypes {
+    signingConfigs {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            storeFile file(project.property("android.injected.signing.store.file"))
+            storePassword project.property("android.injected.signing.store.password")
+            keyAlias project.property("android.injected.signing.key.alias")
+            keyPassword project.property("android.injected.signing.key.password")
         }
     }
+
+    buildTypes {
+        release {
+            minifyEnabled true 
+            shrinkResources false 
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            
+            signingConfig signingConfigs.debug 
+        }
+    }
+    
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+    
     kotlinOptions { jvmTarget = '17' }
+    
     buildFeatures { compose true }
+    
     composeOptions { kotlinCompilerExtensionVersion '1.4.5' }
+    
     externalNativeBuild {
         cmake {
             path "src/main/cpp/CMakeLists.txt"
@@ -51,4 +68,3 @@ dependencies {
     implementation "androidx.compose.material:material-icons-extended"
     implementation "androidx.datastore:datastore-preferences:1.0.0"
 }
-
