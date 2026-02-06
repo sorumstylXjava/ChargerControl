@@ -34,14 +34,14 @@
       "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/StatusScreen.kt",
       "selection": {
         "end": {
-          "column": 60,
-          "index": 366,
-          "line": 9
+          "column": 38,
+          "index": 1005,
+          "line": 27
         },
         "start": {
-          "column": 60,
-          "index": 366,
-          "line": 9
+          "column": 38,
+          "index": 1005,
+          "line": 27
         }
       }
     }
