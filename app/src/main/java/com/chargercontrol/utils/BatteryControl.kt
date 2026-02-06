@@ -1,6 +1,5 @@
 package com.chargercontrol.utils
 
-import android.util.Log
 import kotlin.math.abs
 
 object BatteryControl {
