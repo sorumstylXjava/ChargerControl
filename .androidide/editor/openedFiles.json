@@ -14,7 +14,52 @@
           "line": 61
         }
       }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/service/ChargingService.kt",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 2801,
+          "line": 87
+        },
+        "start": {
+          "column": 0,
+          "index": 2801,
+          "line": 87
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/AndroidManifest.xml",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 0,
+          "line": 0
+        },
+        "start": {
+          "column": 0,
+          "index": 0,
+          "line": 0
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/HomeScreen.kt",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 8210,
+          "line": 183
+        },
+        "start": {
+          "column": 0,
+          "index": 8210,
+          "line": 183
+        }
+      }
     }
   ],
-  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/build.gradle"
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/HomeScreen.kt"
 }

@@ -9,6 +9,7 @@ import com.chargercontrol.MainActivity
 import com.chargercontrol.data.Prefs
 import com.chargercontrol.utils.BatteryControl
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.first
 
 class ChargingService : Service() {
 
@@ -42,9 +43,10 @@ class ChargingService : Service() {
 
         val notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle("Battery Control Active")
-            .setContentText("Monitoring charging and bypass...")
-            .setSmallIcon(android.R.drawable.ic_lock_idle_charging)
+            .setContentText("Monitoring charging limit...")
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setContentIntent(pendingIntent)
+            .setOngoing(true)
             .build()
 
         startForeground(1, notification)
@@ -53,26 +55,33 @@ class ChargingService : Service() {
     private fun monitorBattery() {
         serviceScope.launch {
             while (isActive) {
-                val isEnabled = true 
-                val limit = 80 
+                val isEnabled = prefs.enabledFlow.first()
+                val limit = prefs.limitFlow.first()
                 val currentLevel = BatteryControl.getBatteryLevel(this@ChargingService)
 
                 if (isEnabled) {
                     if (currentLevel >= limit) {
                         BatteryControl.setChargingLimit(false)
-                    } else {
+                    } else if (currentLevel <= (limit - 2)) {
                         BatteryControl.setChargingLimit(true)
                     }
+                } else {
+                    stopSelf()
                 }
-                delay(30000)
+                delay(10000)
             }
         }
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        return START_STICKY
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
         serviceScope.cancel()
+        BatteryControl.setChargingLimit(true)
         super.onDestroy()
     }
 }

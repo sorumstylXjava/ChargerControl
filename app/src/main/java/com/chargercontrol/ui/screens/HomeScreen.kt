@@ -1,5 +1,7 @@
 package com.chargercontrol.ui.screens
 
+import android.content.Intent
+import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -15,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chargercontrol.data.Prefs
+import com.chargercontrol.service.ChargingService
 import com.chargercontrol.utils.BatteryControl
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -86,7 +89,21 @@ fun HomeScreen() {
                 }
                 Switch(
                     checked = isEnabled,
-                    onCheckedChange = { scope.launch { prefs.setEnabled(it) } },
+                    onCheckedChange = { isChecked ->
+                        scope.launch { 
+                            prefs.setEnabled(isChecked)
+                            val intent = Intent(context, ChargingService::class.java)
+                            if (isChecked) {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                    context.startForegroundService(intent)
+                                } else {
+                                    context.startService(intent)
+                                }
+                            } else {
+                                context.stopService(intent)
+                            }
+                        }
+                    },
                     colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFF00E676))
                 )
             }
