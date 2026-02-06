@@ -47,7 +47,12 @@ fun HomeScreen() {
                 }
                 Switch(
                     checked = isEnabled,
-                    onCheckedChange = { scope.launch { prefs.setEnabled(it) } },
+                    onCheckedChange = { 
+                        scope.launch { 
+                            prefs.setEnabled(it)
+                            BatteryControl.setChargingLimit(limit, it)
+                        } 
+                    },
                     colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFF00E676))
                 )
             }
@@ -67,11 +72,18 @@ fun HomeScreen() {
                     Text("Limit Charging", color = Color.White, fontWeight = FontWeight.Bold)
                 }
                 
-                Spacer(Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(20.dp))
                 
                 Slider(
                     value = limit.toFloat(),
-                    onValueChange = { scope.launch { prefs.setLimit(it.toInt()) } },
+                    onValueChange = { 
+                        scope.launch { 
+                            prefs.setLimit(it.toInt())
+                            if (isEnabled) {
+                                BatteryControl.setChargingLimit(it.toInt(), true)
+                            }
+                        } 
+                    },
                     valueRange = 50f..100f,
                     colors = SliderDefaults.colors(thumbColor = Color(0xFF00E676), activeTrackColor = Color(0xFF00E676))
                 )
@@ -111,7 +123,7 @@ fun HomeScreen() {
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3))
                 ) {
-                    Text(if (isBypassActive) "BYPASSING..." else "AKTIFKAN BYPASS")
+                    Text(if (isBypassActive) "BYPASSING..." else "Run Bypass")
                 }
             }
         }
