@@ -4,7 +4,7 @@ import kotlin.math.abs
 
 object BatteryControl {
     init {
-        try { System.loadLibrary("native-lib") } catch (e: Exception) {}
+        try { System.loadLibrary("native-lib") } catch (e: Throwable) {}
     }
 
     external fun executeRoot(command: String): Int
@@ -43,7 +43,7 @@ object BatteryControl {
             "/sys/class/power_supply/bms/cycle_count"
         )
         for (node in cycleNodes) {
-            val count = try { readNode(node).trim() } catch (e: Exception) { "" }
+            val count = try { readNode(node).trim() } catch (e: Throwable) { "" }
             if (count.isNotEmpty() && count != "-1") return count
         }
         return "N/A"

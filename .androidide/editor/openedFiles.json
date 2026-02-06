@@ -1,6 +1,21 @@
 {
   "allFiles": [
     {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/StatusScreen.kt",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 6833,
+          "line": 156
+        },
+        "start": {
+          "column": 0,
+          "index": 6833,
+          "line": 156
+        }
+      }
+    },
+    {
       "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/utils/BatteryControl.kt",
       "selection": {
         "end": {
@@ -14,22 +29,7 @@
           "line": 55
         }
       }
-    },
-    {
-      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/StatusScreen.kt",
-      "selection": {
-        "end": {
-          "column": 0,
-          "index": 6740,
-          "line": 151
-        },
-        "start": {
-          "column": 0,
-          "index": 6740,
-          "line": 151
-        }
-      }
     }
   ],
-  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/StatusScreen.kt"
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/utils/BatteryControl.kt"
 }

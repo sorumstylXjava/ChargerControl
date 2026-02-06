@@ -65,7 +65,12 @@ fun StatusScreen() {
                 
                 currentMA = now / 1000 
                 capacity = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER) / 1000
-                cycleCount = try { BatteryControl.getCycleCount() } catch (e: Exception) { "N/A" }
+                
+                cycleCount = try { 
+                    BatteryControl.getCycleCount() 
+                } catch (e: Throwable) { 
+                    "N/A" 
+                }
 
                 currentHistory.add(abs(currentMA).toFloat())
                 if (currentHistory.size > 20) currentHistory.removeAt(0)
