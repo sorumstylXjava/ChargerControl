@@ -5,13 +5,13 @@
       "selection": {
         "end": {
           "column": 0,
-          "index": 5935,
-          "line": 168
+          "index": 4271,
+          "line": 118
         },
         "start": {
           "column": 0,
-          "index": 5935,
-          "line": 168
+          "index": 4271,
+          "line": 118
         }
       }
     },
@@ -19,14 +19,29 @@
       "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/StatusScreen.kt",
       "selection": {
         "end": {
+          "column": 5,
+          "index": 5887,
+          "line": 134
+        },
+        "start": {
+          "column": 5,
+          "index": 5887,
+          "line": 134
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/HomeScreen.kt",
+      "selection": {
+        "end": {
           "column": 0,
-          "index": 5890,
-          "line": 136
+          "index": 4415,
+          "line": 108
         },
         "start": {
           "column": 0,
-          "index": 5890,
-          "line": 136
+          "index": 4415,
+          "line": 108
         }
       }
     }

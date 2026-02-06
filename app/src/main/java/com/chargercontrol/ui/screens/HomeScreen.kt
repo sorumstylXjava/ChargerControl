@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chargercontrol.data.Prefs
 import com.chargercontrol.utils.BatteryControl
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -42,18 +41,17 @@ fun HomeScreen() {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
-                    Text("Charger Control", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
-                    Text(if (isEnabled) "Service is Running" else "Service is Stopped", color = if (isEnabled) Color(0xFF00E676) else Color.Gray, fontSize = 12.sp)
+                    Text("Service Status", color = Color.Gray, fontSize = 12.sp)
+                    Text(if (isEnabled) "ACTIVE" else "INACTIVE", color = if (isEnabled) Color(0xFF00E676) else Color.Red, fontWeight = FontWeight.Bold, fontSize = 20.sp)
                 }
                 Switch(
                     checked = isEnabled,
                     onCheckedChange = { 
                         scope.launch { 
                             prefs.setEnabled(it)
-                            BatteryControl.setChargingLimit(limit, it)
+                            BatteryControl.setChargingLimit(it)
                         } 
-                    },
-                    colors = SwitchDefaults.colors(checkedThumbColor = Color(0xFF00E676))
+                    }
                 )
             }
         }
@@ -66,33 +64,13 @@ fun HomeScreen() {
             shape = RoundedCornerShape(24.dp)
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Rounded.BatteryChargingFull, null, tint = Color(0xFF00E676))
-                    Spacer(Modifier.width(8.dp))
-                    Text("Limit Charging", color = Color.White, fontWeight = FontWeight.Bold)
-                }
-                
-                Spacer(modifier = Modifier.height(20.dp))
-                
+                Text("Charging Limit", color = Color.White, fontWeight = FontWeight.Bold)
                 Slider(
                     value = limit.toFloat(),
-                    onValueChange = { 
-                        scope.launch { 
-                            prefs.setLimit(it.toInt())
-                            if (isEnabled) {
-                                BatteryControl.setChargingLimit(it.toInt(), true)
-                            }
-                        } 
-                    },
+                    onValueChange = { scope.launch { prefs.setLimit(it.toInt()) } },
                     valueRange = 50f..100f,
-                    colors = SliderDefaults.colors(thumbColor = Color(0xFF00E676), activeTrackColor = Color(0xFF00E676))
+                    steps = 10
                 )
-                
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("50%", color = Color.Gray, fontSize = 12.sp)
-                    Text("${limit}%", color = Color(0xFF00E676), fontWeight = FontWeight.Bold)
-                    Text("100%", color = Color.Gray, fontSize = 12.sp)
-                }
                 Text("Arus otomatis terputus pada $limit%", color = Color.Gray, fontSize = 11.sp)
             }
         }
@@ -105,17 +83,16 @@ fun HomeScreen() {
             shape = RoundedCornerShape(24.dp)
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
-                Text("Bypass Batery", color = Color.White, fontWeight = FontWeight.Bold)
+                Text("Bypass System", color = Color.White, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(12.dp))
                 Button(
                     onClick = {
-                        scope.launch {
-                            isBypassActive = true
-                            BatteryControl.setBypass(true) 
-                            delay(5000) 
-                            BatteryControl.setBypass(false) 
+                        isBypassActive = true
+                        BatteryControl.setBypassLogic {
                             isBypassActive = false
-                            Toast.makeText(context, "Bypass Selesai", Toast.LENGTH_SHORT).show()
+                            scope.launch {
+                                Toast.makeText(context, "Bypass Selesai (5 detik)", Toast.LENGTH_SHORT).show()
+                            }
                         }
                     },
                     enabled = !isBypassActive,
@@ -123,7 +100,7 @@ fun HomeScreen() {
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3))
                 ) {
-                    Text(if (isBypassActive) "BYPASSING..." else "Run Bypass")
+                    Text(if (isBypassActive) "BYPASSING (5s)..." else "AKTIFKAN BYPASS")
                 }
             }
         }
