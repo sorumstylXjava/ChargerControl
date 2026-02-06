@@ -5,13 +5,13 @@
       "selection": {
         "end": {
           "column": 0,
-          "index": 6583,
-          "line": 188
+          "index": 6807,
+          "line": 193
         },
         "start": {
           "column": 0,
-          "index": 6583,
-          "line": 188
+          "index": 6807,
+          "line": 193
         }
       }
     },
@@ -46,5 +46,5 @@
       }
     }
   ],
-  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/ui/screens/HomeScreen.kt"
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/ChargerControl/app/src/main/java/com/chargercontrol/utils/BatteryControl.kt"
 }

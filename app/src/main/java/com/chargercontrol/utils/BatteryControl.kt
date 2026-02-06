@@ -29,6 +29,11 @@ object BatteryControl {
         }
     }
 
+    fun getBatteryLevel(context: Context): Int {
+        val intent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        return intent?.getIntExtra(BatteryManager.EXTRA_LEVEL, 0) ?: 0
+    }
+
     fun getCurrentNow(): Int {
         val paths = listOf(
             "/sys/class/power_supply/battery/current_now",
